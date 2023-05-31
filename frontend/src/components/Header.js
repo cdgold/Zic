@@ -1,18 +1,25 @@
 import React, { useState } from "react"
-import { TextField } from "@mui/material"
+import { TextField, Modal } from "@mui/material"
+import LoginModal from "./LoginModal.js"
+import { Link } from "react-router-dom"
 import styled from "styled-components"
 
-const Header = ({ musicSearchRequest, setMusicSearchText }) => {
+const Header = ({ musicSearchRequest, setMusicSearchText, user, setUser }) => {
+  
+  const [loginModalOpen, setLoginModalOpen] = useState(false) 
+
   return(
-    <div>
+    <div style={ {fontFamily: "Archivo"} }>
       <TextField
         onKeyUp = {(event) => { if(event.key === "Enter"){
           musicSearchRequest()
         }}}
         onChange = {(event) => setMusicSearchText(event.target.value)}
-        variant="outlined"
+        variant = "standard"
       />
+      <LoginModal isOpen={loginModalOpen} setIsOpen={setLoginModalOpen} setUser={setUser} ></LoginModal>
         Header!
+        { (user !== null && typeof user.username !== 'undefiend') ? user.username : <button onClick={() => setLoginModalOpen(true)}> LOGIN </button> }
     </div>
   )
 }

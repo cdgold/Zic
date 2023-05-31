@@ -2,23 +2,16 @@ const http = require("http")
 const express = require("express")
 const app = express()
 const cors = require("cors")
-const usersRouter = require("./controllers/users")
-
-mongoose.connect(config.MONGODB_URI)
-  .then(() => {
-    logger.info("connected to MongoDB")
-  })
-  .catch((error) => {
-    logger.error("MONGODB_URI is: ", config.MONGODB_URI)
-    logger.error("error connecting to MongoDB:", error.message)
-  })
+const usersRouter = require("./controllers/users.js")
+const albumsRouter = require("./controllers/albums.js")
+const albumRatingsRouter = require("./controllers/albumRatings.js")
 
 app.use(cors())
 app.use(express.static("build"))
 app.use(express.json())
-app.use(middleware.requestLogger)
-app.use(middleware.tokenExtractor)
 
 app.use("/api/users", usersRouter)
+app.use("/api/albums", albumsRouter)
+app.use("/api/albumRatings", albumRatingsRouter)
 
 module.exports = app

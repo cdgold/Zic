@@ -1,13 +1,14 @@
 //MOVE TO .ENV!!!
 
-import { Pool } from "pg"
+require('dotenv').config()
+const { Pool } = require('pg')
 
-const pool = new Pool({
-  user: "zicmaster",
-  database: "Zic",
-  password: "root",
+const databasePool = new Pool({
+  user: process.env.DATABASE_LOGIN,
+  database: process.env.DATABASE_NAME,
+  password: process.env.DATABASE_PASSWORD,
   port: 5432,
   host: "localhost",
 })
 
-export default pool
+module.exports = databasePool

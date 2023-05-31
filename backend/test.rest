@@ -1,0 +1,15 @@
+GET http://localhost:3003/api/albumRatings/3/6cPoZUF1MLvQvXkfDGHwsf
+###
+POST http://localhost:3003/api/albumRatings/
+content-type: application/json
+
+{
+    "userID": "2",
+    "review": {
+        "rating": 50,
+        "reviewText": "Meh",
+        "listenList": false
+    },
+    "title": "Never Hungover Again",
+    "albumID": "6cPoZUF1MLvQvXkfDGHwsf"
+}
