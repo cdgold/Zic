@@ -2,13 +2,22 @@ import React from "react"
 import { ThemeProvider } from "styled-components"
 
 const theme = {
-  colors: {
-    powderWhite: "#FFFDF9",
-    persianGreen: "#06B49A",
-    lightBlue: "#AFDBD2",
-    onyx: "#36313D"
+  headerMargin: "3em",
+  fonts: {
+    sizes: {
+      titleSmall: "24px",
+      bodyBig: "18px",
+      bodyMedium: "14px",
+      bodySmall: "10px"
+    }
   },
-  fonts: ["sans-serif", "Roboto"],
+  colors: {
+    primaryOne: "#FF0000",
+    primaryTwo: "#0047FF",
+    primaryThree: "#FFFFFF",
+  },
+  titleFonts: "Archivo Black, Archivo, sans-serif",
+  bodyFonts: "Archivo, sans-serif",
   fontSizes: {
     small: "1em",
     medium: "2em",

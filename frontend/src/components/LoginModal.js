@@ -20,7 +20,7 @@ const LoginModal = ({ setUser, isOpen, setIsOpen }) => {
 
   const submitLoginForm= () => {
     console.log(`Logging in with: ${username} and ${password}`)
-    const user = {username: username, password: password}
+    const user = {username: username, id: password}
     setUser(user)
   }
 
