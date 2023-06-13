@@ -17,6 +17,12 @@ app.use("/api/users", usersRouter)
 app.use("/api/albums", albumsRouter)
 app.use("/api/albumRatings", albumRatingsRouter)
 app.use("/api/songRatings", songRatingsRouter)
+
+/*
+app.get('*', function(req, res) {
+  res.sendFile('index.html', {root: path.join(__dirname, './build/')})
+})
+*/
 app.use(middleware.errorHandler)
 app.use(middleware.unknownEndpoint)
 

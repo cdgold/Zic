@@ -30,7 +30,7 @@ const errorHandler = (error, request, response, next) => {
     response.status(error.status).json({ message });
     return;
   } else if (error.message.includes("duplicate key value violates")) {
-    const message = "Entry already exists, update it.";
+    const message = "Entry already exists, update it instead.";
     return response.status(400).json({ message })
   } else if (error.status === "400") {
     return response.status(400).send({ error: "invalid request" })

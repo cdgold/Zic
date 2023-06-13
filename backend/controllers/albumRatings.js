@@ -10,7 +10,15 @@ albumRatingsRouter.get("/", async (request, response) => {
   response.json(ratings.rows)
 })
 
-// ratings require userID and albumID
+// returns all album ratings of a user
+albumRatingsRouter.get("/user/:auth0ID", async (request, response) => {
+  const userID = request.params.userID
+  const albumRatings = await dbpool.query(`SELECT * FROM album_ratings WHERE auth0_id = $1`, [userID])
+  albumRatings.rowCount === 0 ? response.status(204).end() : response.status(200).json(foundRatings.rows)
+})
+  
+
+// returns album w/ track ratings
 albumRatingsRouter.get("/:userID/:albumID", async (request, response) => {
   const userID = request.params.userID
   const albumID = request.params.albumID
@@ -26,7 +34,7 @@ albumRatingsRouter.get("/:userID/:albumID", async (request, response) => {
 })
   
 
-// request.body required parameters: userID, albumID, review (which could contain rating (1-100), reviewText, listenList, trackRatings fields)
+// request.body required parameters: userID, albumID, review (which could contain rating (1-100), reviewText, listenList, listened fields)
 // trackRatings is an array of tracks, made up of [id, rating]
 
 albumRatingsRouter.post("/", async (request, response, next) => {
@@ -51,7 +59,8 @@ albumRatingsRouter.post("/", async (request, response, next) => {
   }
   try{
     let newReview = {}
-    typeof review.rating !== "undefined" && isNaN(review.rating) && review.rating < 0 && review.rating > 100 ?    // rating must be between 1 and 100
+    typeof review.rating !== "undefined" && isNaN(review.rating) 
+    && review.rating < 0 && review.rating > 100 && review.rating !== "" ?    // rating must be between 1 and 100
       newReview["rating"] = null 
       : newReview["rating"] = review.rating
     typeof review.reviewText !== "undefined" && (typeof review.reviewText === 'string' || review.reviewText instanceof String) ?   
@@ -63,14 +72,17 @@ albumRatingsRouter.post("/", async (request, response, next) => {
     typeof review.listened !== "undefined" && review.listened === true ?   
       newReview["listened"] = true
       : newReview["listened"] = false
-    const requestValues = [userID, albumID, newReview["rating"], newReview["reviewText"], newReview["listenList"], newReview["listened"]]
-    const insertedAlbum = await dbpool.query(`INSERT INTO "album_ratings" (auth0_id, album_id, rating, review_text,
-        listen_list, listened) VALUES ($1, $2, $3, $4, $5)`, requestValues)
-    let insertedRows = {"album":  { "review": review }}
+    const requestValues = [userID, albumID, newReview["rating"], newReview["reviewText"], newReview["listenList"], newReview["listened"], new Date()]
+    await dbpool.query(`INSERT INTO "album_ratings" (auth0_id, album_id, rating, review_text,
+        listen_list, listened, post_time) VALUES ($1, $2, $3, $4, $5, $6, $7)`, requestValues)
+    const insertedAlbumResponse = await dbpool.query(`SELECT (auth0_id, album_id, rating, review_text,
+      listen_list, listened, post_time) FROM "album_ratings"`)
+    const insertedRows = insertedAlbumResponse.rows[0]
     let trackRatingResponses = []
     if (typeof request.body.trackRatings !== "undefined"){
-      for (track of request.body.trackRatings) {
-        if(typeof track.id !== "undefined" && typeof track.rating !== "undefined"){
+      for (const track in request.body.trackRatings) {
+        if(typeof track.id !== "undefined" && typeof track.rating !== "undefined" && isNaN(track.rating) 
+        && track.rating < 0 && track.rating > 100 && track.rating !== ""){
           let songQuery = await dbpool.query(`SELECT (song_id, album_id) FROM "songs" WHERE song_id = $1`, [track.id])
           if (songQuery.rowCount == 0){
             await dbpool.query(`INSERT INTO "songs" (song_id, album_id) VALUES ($1, $2)`, [track.id, albumID])

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { TextField } from "@mui/material"
+import auth0Service from "../services/auth0.js"
 import { Link, useNavigate } from "react-router-dom"
 import styled from "styled-components"
 import dummyResults from "../test/dummySearchResults.js"
@@ -19,7 +19,7 @@ const ResultRow = styled.div`
   font-size: ${props => props.theme.fonts.sizes.titleSmall};
 `
 
-const Result = ({ track }) => {
+const TrackResult = ({ track }) => {
   return(
     <ResultRow>
       <HrStyled />
@@ -32,10 +32,23 @@ const Result = ({ track }) => {
   )
 }
 
-const SearchResults = ({ searchResponse, searchQuery }) => {
+const UserResult = ({ user }) => {
+  return(
+    <ResultRow>
+      <HrStyled />
+      { user.picture && (user.picture !== "") ? 
+        <img style={{ height: "80px", width:"80px" }} src={user.picture} /> 
+        : null
+      }
+      <br></br>
+      {user.nickname} 
+    </ResultRow>
+  )
+}
+
+const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
   //searchQuery = "Tyler the creator"
   //searchResponse = dummyResults.albums.items
-  console.log(searchResponse)
 
   if (searchResponse.length === 0){
     return(
@@ -46,8 +59,9 @@ const SearchResults = ({ searchResponse, searchQuery }) => {
   }
   return(
     <div>
-        Results for: {searchQuery}
-        {searchResponse.map(result => {
+        Album search for: {searchQuery}
+        {typeof searchResponse.albums !== "undefined" ? 
+          searchResponse.albums.map(result => {
           const albumID = result.uri.split(":")[2]
           return(
           <Link 
@@ -55,10 +69,26 @@ const SearchResults = ({ searchResponse, searchQuery }) => {
             key={result.uri} 
             to={`/album/${albumID}`}
           >
-            <Result track={result} />
+            <TrackResult track={result} />
           </Link>
-          )
-        })}
+          )})
+        : <div> No albums to show. </div>}
+        User search for: {searchQuery}
+        {typeof searchResponse.users !== "undefined" && searchResponse.users !== [] ?
+        searchResponse.users.map(result => {
+          console.log(result)
+          const userID = result.userID
+          return(
+          <Link 
+            onClick={() => setOtherUser(result)}
+            style={{ textDecoration: "none", textColor: "red" }} 
+            key={userID} 
+            to={`/profile/${userID}`}
+          >
+            <UserResult user={result} />
+          </Link>
+          )})
+        : <div> No users found. </div> }
     </div>
   )
 }

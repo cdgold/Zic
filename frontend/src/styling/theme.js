@@ -1,7 +1,10 @@
-import React from "react"
-import { ThemeProvider } from "styled-components"
 
 const theme = {
+  palette: {
+    primary: {
+      main: "#FF0000",
+    },
+  },
   headerMargin: "3em",
   fonts: {
     sizes: {
@@ -25,8 +28,4 @@ const theme = {
   }
 }
 
-const Theme = ({ children }) => (
-    <ThemeProvider theme={theme}>{children}</ThemeProvider>
-)
-
-export default Theme
+export default theme

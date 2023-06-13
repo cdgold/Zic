@@ -1,19 +1,10 @@
-GET http://localhost:3003/api/albumRatings/1/4G
+GET http://localhost:3003/api/users/auth0%7C647a59e1fc60c55ea86431b0
 ###
-POST http://localhost:3003/api/albumRatings/
+
+###
+POST http://localhost:3003/api/albums/spotify
 content-type: application/json
 
 {
-    "userID": "3",
-    "albumID": "09dajsdf",
-    "review": {
-        "reviewText": "wagabaga",
-        "listenList": "true"
-    },
-    "trackRatings": [
-        {
-            "id": "6OmhkSOpKQxpIGx2",
-            "rating": 99
-        }
-    ]
+    "ids": ["382ObEPsp2rxGrnsizN5TX","1A2GTWGtFfWp7KSQTwWOyo","2noRn2Aes5aoNVsU6iWThc"]
 }

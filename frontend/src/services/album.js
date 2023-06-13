@@ -1,9 +1,6 @@
 
 import axios from "axios"
 
-//GET http://localhost:3003/api/albums/searchSpotify/query/
-//MOVE TO BACKEND!!
-
 const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/albums`
 
 let token = null
@@ -19,6 +16,12 @@ const getAlbum = async ({ id }) => {
 const getSpotifyAlbum = async ({ id }) => {
   const urlToGet = `${baseUrl}/spotify/${id}`
   const albumResponse = await axios.get(urlToGet)
+  return albumResponse.data
+}
+
+const getMultipleSpotifyAlbums = async (idArray) => {
+  const urlToPost = `${baseUrl}/spotify/`
+  const albumResponse = await axios.post(urlToPost, idArray)
   return albumResponse.data
 }
 
@@ -42,5 +45,6 @@ export default {
   getAlbum,
   searchSpotify,
   getSpotifyAlbum,
+  getMultipleSpotifyAlbums,
   getIDfromURI
 }

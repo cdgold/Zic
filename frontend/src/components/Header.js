@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react"
-import { ThemeContext } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { TextField, Button } from "@mui/material"
-import LoginModal from "./LoginModal.js"
+//import LoginModal from "./LoginModal.js"
 import { Link, useNavigate } from "react-router-dom"
 import styled from "styled-components"
 import magnifyingGlass from "../assets/images/magnifying_glass_transparent_bg.png"
@@ -67,19 +67,21 @@ const topRightButtonStyle = {
   color: "black"
 }
 
-const Header = ({ musicSearchRequest, setMusicSearchText, user, setUser }) => {
+const Header = ({ musicSearchRequest, setMusicSearchText }) => {
+  const theme = useTheme()
+
   const navigate = useNavigate()
   const [loginModalOpen, setLoginModalOpen] = useState(false) 
-  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   const handleLogin = async () => {
     await loginWithRedirect()
   }
 
   const handleLogout = async () => {
-    await logout({ 
+    logout({ 
       logoutParams: {
-        returnTo: ("http::/localhost:3000/")
+        returnTo: (`${process.env.REACT_APP_REDIRECT}`)
       }
     })
   }
@@ -94,8 +96,8 @@ const Header = ({ musicSearchRequest, setMusicSearchText, user, setUser }) => {
       </LogoText>
       </Link>
       <TopRightBar>
-      { isAuthenticated
-          ? <Button sx={topRightButtonStyle} variant="text" onClick={() => navigate("/profile/")}> {user.nickname} </Button> 
+      { (isAuthenticated && typeof user.nickname !== "undefined")
+          ? <Button sx={topRightButtonStyle} variant="text" onClick={() => navigate("/profile")}> {user.nickname} </Button> 
           : <Button sx={topRightButtonStyle} variant="text" onClick={handleLogin}> LOGIN </Button> }
       {<Button sx={topRightButtonStyle} variant="text" onClick={handleLogout}> LOGOUT </Button>}
         <img style={{height: "1em", width:"1em", marginRight:"5px"}} src={magnifyingGlass} />
@@ -103,11 +105,11 @@ const Header = ({ musicSearchRequest, setMusicSearchText, user, setUser }) => {
           onKeyUp = {(event) => { if(event.key === "Enter"){
             musicSearchRequest()
           }}}
+          sx={{ color: theme.colors.primaryOne  }}
           onChange = {(event) => setMusicSearchText(event.target.value)}
           variant = "standard"
         />
       </TopRightBar>
-      <LoginModal isOpen={loginModalOpen} setIsOpen={setLoginModalOpen} setUser={setUser} ></LoginModal>
     </HeaderDiv>
   )
 }

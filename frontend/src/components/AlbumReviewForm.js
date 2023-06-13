@@ -4,7 +4,7 @@ import styled from "styled-components"
 
 const ReviewFormDiv = styled.div`
   display: grid;
-  grid-template-columns: 1fr, 1fr, 1fr, 1fr, 1fr, 1fr;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-template-rows: 1fr, 3fr, 1fr;
 `
 
@@ -42,9 +42,13 @@ const ReviewForm = ({ textReview,
   }
 
   useEffect(() => {
-    if(userRating !== null){
-      setTextReview(userRating.review_text)
-      setNumberRating({"value": userRating.rating, "error": ""})
+    if(userRating !== null && typeof userRating !== "undefined"){
+      if(typeof userRating.review_text !== "undefined") {
+        setTextReview(userRating.review_text)
+      }
+      if(typeof userRating.rating !== "undefined") {
+        setNumberRating({"value": userRating.rating, "error": ""})
+      }
     }
   }, [userRating])
 
@@ -66,7 +70,7 @@ const ReviewForm = ({ textReview,
       />
     <FormText> Your thoughts: </FormText>
       <TextField
-        sx={{ gridColumn:"2 / span 5", gridRow:"2" }}
+        sx={{ gridColumn:"2 / span 5", gridRow:"2", width: "95%" }}
         value={textReview}
         onChange={e => setTextReview(e.target.value)}
         placeholder = "Review the album here..."

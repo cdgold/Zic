@@ -22,7 +22,7 @@ const PageDiv = styled.div`
 const AlbumPageDiv = styled.div`
   display: grid;
   grid-template-columns: ${ALBUM_PAGE_DIV_COLUMN_1_PX}px ${ALBUM_PAGE_DIV_COLUMN_2_PX}px;
-  grid-auto-rows: auto;
+  grid-auto-rows: min-content 400px min-content;
   row-gap: 15px;
   margin: 0 auto;
 `
@@ -62,9 +62,7 @@ const AlbumImg = styled.img`
 const TracklistDiv = styled.div`
   grid-column: 2;
   grid-row: 2 / span 2;
-  display:grid;
-  font-family: "Archivo";
-  font-style: normal;
+  font-family: "Archivo", sans-serif;
 `
 
 
@@ -77,20 +75,26 @@ color: ${props => props.theme.colors.primaryTwo};
 `
 
 
-const TracklistSubtitleDiv = styled.div`
+const TracklistSubtitleTh = styled.th`
   font-weight: 700;
+  text-align: left;
   font-size: 20px;
   color: black;
   -webkit-text-stroke-width: 0px;
   -webkit-text-stroke-color: black;
 `
 
-const TracklistGrid = styled.div`
-  display: grid;
-  grid-template-columns: 200px 50px 100px;
+const TracklistTable = styled.table`
+  grid-column: 2;
+  grid-row: 2 / span 2;
+  width: 100%;
+  font-style: normal;
+  border-spacing: 5px;
 `
 
 const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
+
+  // if user is null and they attempt to enter edit mode, redirect to login
 
   const [showTrackLength, setShowTrackLength] = useState("")
 
@@ -105,23 +109,25 @@ const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
   }, [track])
   
   return(
-    <div>
-  <div style={{ gridColumn: "1" }}>
-    <span style={{color: "#d4d4d4"}}> {track.track_number} </span> {track.name}
-  </div>
-  <div style={{ gridColumn: "2" }}>
-    {showTrackLength}
-  </div>
-  <TextField
-        sx={{ width: "5em", gridColumn: "3" }}
-        value={trackRatings[track.id] || ""}
-        type="number"
-        onChange={event => handleTrackRatingChange({ trackID: track.id, value: event.target.value })}
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
-  </div>
+  <tr>
+    <td>
+      <span style={{color: "#d4d4d4"}}> {track.track_number} </span> {track.name}
+    </td>
+    <td>
+      {showTrackLength}
+    </td>
+    <td>
+    <TextField
+          sx={{ width: "5em", textAlign: "center" }}
+          value={trackRatings[track.id] || ""}
+          type="number"
+          onChange={event => handleTrackRatingChange({ trackID: track.id, value: event.target.value })}
+          InputLabelProps={{
+            shrink: true,
+          }}
+        />
+    </td>
+  </tr>
   )
 }
 
@@ -153,7 +159,7 @@ const AlbumPage = ({ albumID }) => {
 
   useEffect(() => {
     
-    if(isAuthenticated){
+    if(isAuthenticated && typeof user.sub !== "undefined"){
     albumRatingService.getRating({ "userID": user.sub, "albumID": albumID })
       .then(returnedRating => {
         console.log("Returned rating is: ", returnedRating)
@@ -170,7 +176,7 @@ const AlbumPage = ({ albumID }) => {
 
   const handleFormSubmit = async () => {
     const newRating = {
-      "userID": "auth0|1", 
+      "userID": user.sub, 
       "albumID": albumID,
       "review": {
         "rating": numberRating.value,
@@ -213,16 +219,18 @@ const AlbumPage = ({ albumID }) => {
       />
       <TracklistDiv>
         <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
-        <TracklistGrid>
-        <TracklistSubtitleDiv style={{ gridColumn: 1, gridRow: 1 }}> Track title </TracklistSubtitleDiv>
-        <TracklistSubtitleDiv style={{ gridColumn: 2, gridRow: 1 }}> Length </TracklistSubtitleDiv>
-        <TracklistSubtitleDiv style={{ gridColumn: 3, gridRow: 1 }}> Your Rating </TracklistSubtitleDiv>
+        <TracklistTable>
+        <tr>
+        <TracklistSubtitleTh style={{ width: "55%" }}> Track title </TracklistSubtitleTh>
+        <TracklistSubtitleTh style={{ width: "15%" }}> Len. </TracklistSubtitleTh>
+        <TracklistSubtitleTh style={{ width: "30%" }}> Your Rating </TracklistSubtitleTh>
+        </tr>
         {album.tracks.total > 0 ? 
-          <div> {album.tracks.items.map(item => 
-            <TrackEntry key={item.uri} trackRatings={trackRatings} handleTrackRatingChange={handleTrackRatingChange} track={item} />)} </div>
-          : <div> No tracks to show... </div>
+          album.tracks.items.map(item => 
+          <TrackEntry key={item.uri} trackRatings={trackRatings} handleTrackRatingChange={handleTrackRatingChange} track={item} />)
+          : <tr> No tracks to show... </tr>
         }
-        </TracklistGrid>
+        </TracklistTable>
       </TracklistDiv>
       <Button onClick={() => handleFormSubmit()}> Submit </Button>
     </AlbumPageDiv>

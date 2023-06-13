@@ -64,4 +64,12 @@ albumsRouter.post("/", async (request, response) => {
   return response.status(200).json(newAlbum)
 })
 
+// give array of ids to look up, returns said albums in array
+albumsRouter.post("/spotify", async (request, response) => {
+  const requestedAlbums = request.body.ids
+
+  const albums = await spotifyService.getMultipleWithID({"ids": requestedAlbums, "type": "album"})
+  return response.status(200).json(albums)
+})
+
 module.exports = albumsRouter

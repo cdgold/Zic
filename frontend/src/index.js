@@ -5,6 +5,7 @@ import Theme from "./styling/theme.js"
 import "./styling/fonts.css"
 import App from "./App"
 import { Auth0Provider } from "@auth0/auth0-react"
+import { ThemeProvider } from "styled-components"
 
 const root = ReactDOM.createRoot(document.getElementById("root"))
 root.render(
@@ -12,13 +13,14 @@ root.render(
     domain={process.env.REACT_APP_AUTH0_DOMAIN}
     clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
     authorizationParams={{
-      redirect_uri: "http://localhost:3000/profile/"
-    }}
+      redirect_uri: `${process.env.REACT_APP_REDIRECT}/profile/`
+    }
+  }
   >
     <Router>
-      <Theme>
+      <ThemeProvider theme={Theme}>
         <App />
-      </Theme>
+      </ThemeProvider>
     </Router>
   </ Auth0Provider>
 )

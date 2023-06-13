@@ -1,6 +1,7 @@
 import "./App.css"
 import React, { useState, useEffect } from "react"
 import albumService from "./services/album.js"
+import userService from "./services/user.js"
 import AlbumPage from "./components/AlbumPage.js"
 import Home from "./components/Home.js"
 import Profile from "./components/Profile.js"
@@ -21,19 +22,27 @@ const RoutesDiv = styled.div`
 `
 
 function App() {
-  const { user } = useAuth0()
-  console.log(user)
   const navigate = useNavigate()
 
   const [musicSearchText, setMusicSearchText] = useState("")
   const [searchResponse, setSearchResponse] = useState([])
+  const [otherUser, setOtherUser] = useState(null)  // used for viewing profiles found from search
   //const [user, setUser] = useState(null)
   //const [album, setAlbum] = useState(dummyAlbum)
 
   const musicSearchRequest = async () => {
-    console.log(`Request with content ${musicSearchText} and type album`)
-    const APIResponse = await albumService.searchSpotify({ query: musicSearchText, type: "album" })
-    setSearchResponse(APIResponse)
+    let albumResponse, userResponse
+    try {
+      [albumResponse, userResponse] = await Promise.all([
+      albumService.searchSpotify({ query: musicSearchText, type: "album" }),
+      userService.search({ query: musicSearchText })
+    ])
+    } catch (error) {
+      navigate(`/error`)
+    }
+
+    
+    setSearchResponse({"albums": albumResponse, "users": userResponse})
     navigate(`/search/${musicSearchText}`)
   }
 
@@ -41,24 +50,30 @@ function App() {
   const albumID = albumMatch ?
     albumMatch.params.id
     : null 
+  
+  const profileMatch = useMatch("/profile/:userID")
+  const profileID = profileMatch ?
+    profileMatch.params.id
+    : null 
   return (
     <div>
       <Header
         setMusicSearchText={setMusicSearchText}
         musicSearchRequest={musicSearchRequest}
         musicSearchText={musicSearchText}
-        user={user}
       >
       </Header>
       <RoutesDiv>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/profile/" element={<Profile />} />
+          <Route path="/profile/" element={<Profile otherUser={null} otherUserID={null}/>} />
+          <Route path="/profile/:userID" element={<Profile otherUser={otherUser} otherUserID={profileID}/>} />
           <Route path="/search/:query" element={
-            <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} />
+            <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={otherUser} />
           } />
-          <Route path="/album/:id" element={<AlbumPage albumID={albumID} user={user} />} />
+          <Route path="/album/:id" element={<AlbumPage albumID={albumID} />} />
           <Route path="/error/" element={<div> Something went wrong! Navigate back to the home page. </div>} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </RoutesDiv>
     </div>

@@ -53,6 +53,35 @@ const getWithID = async ({ id, type }) => {
     }
   }
 
+const getMultipleWithID = async ({ ids, type }) => {
+  await checkTokenValidity()
+  let config = {}
+  if(token !== null){
+    config = {
+      headers:{
+        "Authorization": token
+      }
+    }
+  }
+  else {
+    throw new Error("Set Spotify API key first.")
+  }
+  if (ACCEPTABLE_SEARCH_TYPES.includes(type)){
+    let getRequestUrl = `${SPOTIFY_BASE_URL}/${type}s/?ids=`
+    ids.forEach((id, index) => {
+      getRequestUrl = `${getRequestUrl}${id}`
+      if (index + 1 !== ids.length){
+        getRequestUrl = getRequestUrl + ","
+      }
+    })
+    const response = await axios.get(getRequestUrl, config)
+    return(response.data)
+  }
+  else{
+    throw new Error("Invalid type for get request.")
+  }
+}
+
 
 //returns array of search results
 const search = async ({ query, type }) => {
@@ -84,4 +113,4 @@ const search = async ({ query, type }) => {
 }
 
 
-module.exports = {getAndSetToken, search, getWithID}
+module.exports = {getAndSetToken, search, getWithID, getMultipleWithID}
