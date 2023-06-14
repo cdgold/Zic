@@ -18,7 +18,7 @@ const setToken = async () => {
       grant_type: 'client_credentials',
       client_id: `${process.env.AUTH0_CLIENT_ID}`,
       client_secret: `${process.env.AUTH0_CLIENT_SECRET}`,
-      audience: `${process.env.AUTH0_AUDIENCE}`
+      audience: `${process.env.AUTH0_MANAGEMENT_AUDIENCE}`
     })
     const response = await axios.post(postUrl, requestBody, options)
     token = `Bearer ${response.data.access_token}`
@@ -43,7 +43,7 @@ const getUser = async (ID) => {
 }
 
 const searchUsersByNickname = async (query) => {
-  query = query.replace(/\s/g, '');
+  query = query.replace(/\s/g, '')
   await checkTokenValidity()
   const config = {
     "headers": {
@@ -58,7 +58,7 @@ const searchUsersByNickname = async (query) => {
 
 const validateAccessToken = auth({
   issuerBaseURL: `${process.env.AUTH0_DOMAIN}`,
-  audience: process.env.AUTH0_AUDIENCE,
+  audience: `${process.env.AUTH0_AUDIENCE}`,
   tokenSigningAlg: 'RS256'
 })
 

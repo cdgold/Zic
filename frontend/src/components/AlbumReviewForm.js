@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react"
 import { FormControl, TextField, Button } from "@mui/material"
-import styled from "styled-components"
+import styled, { useTheme } from "styled-components"
 
 const ReviewFormDiv = styled.div`
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   grid-template-rows: 1fr, 3fr, 1fr;
+  width: 400px;
 `
 
 const FormTitle = styled.div`
@@ -27,8 +28,11 @@ const ReviewForm = ({ textReview,
     setListened,
     listenList,
     setListenList,
-    userRating }) => {
+    userRating,
+    handleFormSubmit }) => {
   
+   const theme = useTheme()
+
   const handleNumberRatingChange = (event) => {
     const parsedFloat = parseFloat(event.target.value)
     let newNumberRating = {value: event.target.value}
@@ -53,32 +57,38 @@ const ReviewForm = ({ textReview,
   }, [userRating])
 
   return(
-    <FormControl >
-    <ReviewFormDiv>
-    <button style={{ gridColumn: "1 / span 2", gridRow: 1 }} onClick={() => setListened(true)} > Listened? </button>
-    <button style={{ gridColumn: "3 / span 2", gridRow: 1 }} onClick={() => setListenList(true)}> Need to listen? </button>
-    <TextField
-        sx={{ width: "5em", gridColumn: "5 / span 2" }}
-        error={numberRating.error !== ""}
-        helperText={numberRating.error}
-        value={numberRating.value}
-        type="number"
-        onChange={event => handleNumberRatingChange(event)}
-        InputLabelProps={{
-          shrink: true,
-        }}
-      />
-    <FormText> Your thoughts: </FormText>
-      <TextField
-        sx={{ gridColumn:"2 / span 5", gridRow:"2", width: "95%" }}
-        value={textReview}
-        onChange={e => setTextReview(e.target.value)}
-        placeholder = "Review the album here..."
-        multiline
-        rows={4}
-      />
-    </ReviewFormDiv>
-    </FormControl>
+    <div>
+        <FormControl >
+        <ReviewFormDiv>
+        <button style={{ gridColumn: "1 / span 2", gridRow: 1 }} onClick={() => setListened(!listened)} > 
+        {listened ? "Listened" : "Listened?"}
+        </button>
+        <button style={{ gridColumn: "3 / span 2", gridRow: 1 }} onClick={() => setListenList(!listenList)}> 
+        {listenList ? "On your listen list" : "Add to listen list?"} 
+        </button>
+        <TextField
+            sx={{ width: "5em", gridColumn: "5 / span 2", justifySelf: "center" }}
+            error={numberRating.error !== ""}
+            value={numberRating.value}
+            type="number"
+            onChange={event => handleNumberRatingChange(event)}
+            InputLabelProps={{
+            shrink: true,
+            }}
+        />
+        <FormText> Your thoughts: </FormText>
+        <TextField
+            sx={{ gridColumn:"2 / span 5", gridRow:"2", width: "95%" }}
+            value={textReview}
+            onChange={e => setTextReview(e.target.value)}
+            placeholder = "Review the album here..."
+            multiline
+            rows={4}
+        />
+        <Button sx={{ color: "black", gridRow:"3 / span 1", gridColumn:"5 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }} onClick={() => handleFormSubmit()}> Submit changes </Button>
+        </ReviewFormDiv>
+        </FormControl>
+    </div>
   )
 }
 

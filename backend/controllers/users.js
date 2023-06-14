@@ -35,7 +35,7 @@ usersRouter.get("/search/:query", async (request, response) => {
       const trimmedUser = {
         "nickname": response.nickname,
         "picture": response.picture,
-        "userID ": auth0Service.dropStartOfSub(response.user_id)
+        "userID": auth0Service.dropStartOfSub(response.user_id)
       }
       return trimmedUser
     })

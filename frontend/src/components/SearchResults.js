@@ -19,6 +19,12 @@ const ResultRow = styled.div`
   font-size: ${props => props.theme.fonts.sizes.titleSmall};
 `
 
+const UserLink = styled.a`
+  &:hover {
+    cursor: pointer;
+  }
+`
+
 const TrackResult = ({ track }) => {
   return(
     <ResultRow>
@@ -50,6 +56,14 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
   //searchQuery = "Tyler the creator"
   //searchResponse = dummyResults.albums.items
 
+  const navigate = useNavigate()
+
+  const handleUserClick = ({ event, user }) => {
+    event.preventDefault()
+    setOtherUser(user)
+    navigate(`/profile/${user.userID}`)
+  }
+
   if (searchResponse.length === 0){
     return(
     <div>
@@ -79,14 +93,13 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
           console.log(result)
           const userID = result.userID
           return(
-          <Link 
-            onClick={() => setOtherUser(result)}
-            style={{ textDecoration: "none", textColor: "red" }} 
+          <UserLink
+            onClick={(event) => handleUserClick({ "event": event, "user": result  })}
             key={userID} 
             to={`/profile/${userID}`}
           >
             <UserResult user={result} />
-          </Link>
+          </UserLink>
           )})
         : <div> No users found. </div> }
     </div>

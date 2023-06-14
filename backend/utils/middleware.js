@@ -4,6 +4,9 @@ const {
 } = require("express-oauth2-jwt-bearer");
 
 const requestLogger = (request, response, next) => {
+  if(typeof request.headers.authorization !== "undefined"){
+    console.log("Token: ", request.headers.authorization)
+  }
   console.log("Method:", request.method)
   console.log("Path:  ", request.path)
   console.log("Body:  ", request.body)

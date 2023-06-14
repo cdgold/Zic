@@ -52,7 +52,7 @@ albumsRouter.get("/spotify/:id", async (request, response, next) => {
 
 albumsRouter.post("/", async (request, response) => {
   if (typeof request.body.artistName === "undefined" || typeof request.body.title === "undefined" || typeof request.body.albumID === "undefined"){
-    return response.status(401).json({
+    return response.status(400).json({
       error: "album creation requires artistName, title, and albumID"
     })
   }
@@ -66,7 +66,7 @@ albumsRouter.post("/", async (request, response) => {
 
 // give array of ids to look up, returns said albums in array
 albumsRouter.post("/spotify", async (request, response) => {
-  const requestedAlbums = request.body.ids
+  const requestedAlbums = request.body
 
   const albums = await spotifyService.getMultipleWithID({"ids": requestedAlbums, "type": "album"})
   return response.status(200).json(albums)

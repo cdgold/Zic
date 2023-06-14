@@ -69,7 +69,7 @@ function App() {
           <Route path="/profile/" element={<Profile otherUser={null} otherUserID={null}/>} />
           <Route path="/profile/:userID" element={<Profile otherUser={otherUser} otherUserID={profileID}/>} />
           <Route path="/search/:query" element={
-            <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={otherUser} />
+            <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={setOtherUser} />
           } />
           <Route path="/album/:id" element={<AlbumPage albumID={albumID} />} />
           <Route path="/error/" element={<div> Something went wrong! Navigate back to the home page. </div>} />

@@ -16,12 +16,17 @@ const getRating = async ({ userID, albumID }) => {
   return albumRatingResponse.data
 }
 
-const postRating = async ({ rating }) => {
+const postRating = async ({ rating, token }) => {
+  let config = {}
+  config = auth0Service.setHeaderToken({ "config": config, "token": token })
   const newUserID = auth0Service.dropStartOfSub(rating.userID)
   rating["userID"] = newUserID
     const urlToPost = `${baseUrl}`
+    if (typeof rating.review.rating !== "undefined" && !(isNaN(rating.review.rating))){
+      rating.review.rating = rating.review.rating * 10
+    }
     console.log("posting to: ", urlToPost, " with ", rating)
-    const albumRatingResponse = await axios.post(urlToPost, rating)
+    const albumRatingResponse = await axios.post(urlToPost, rating, config)
     return albumRatingResponse.data
   }
 

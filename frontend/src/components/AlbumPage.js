@@ -3,6 +3,8 @@ import { FormControl, TextField, Button } from "@mui/material"
 import styled from "styled-components"
 import albumService from "../services/album.js"
 import albumRatingService from "../services/albumRating.js"
+import songRatingService from "../services/songRating.js"
+import auth0Service from "../services/auth0.js"
 import { useNavigate } from "react-router-dom"
 import dummyAlbum from "../test/dummyData.js"
 import ReviewForm from "./AlbumReviewForm.js"
@@ -132,7 +134,8 @@ const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
 }
 
 const AlbumPage = ({ albumID }) => {
-  const { user, isAuthenticated } = useAuth0()
+  const { user, isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const [editMode, setEditMode] = useState(true)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
   const [userRating, setUserRating] = useState(null)
@@ -183,11 +186,43 @@ const AlbumPage = ({ albumID }) => {
         "reviewText": textReview,
         "listenList": listenList,
         "listened": listened
-      },
-      "trackRatings": trackRatings
+      }
     }
-    await albumRatingService.postRating({ "rating": newRating })
+    let token
+    try { 
+        token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+        },
+      })}
+      catch (error) {
+        token = await getAccessTokenWithPopup({
+          authorizationParams: {
+            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+          },
+        })
+      }
+      console.log("Token is: ", token)
+    await albumRatingService.postRating({ "rating": newRating, "token": token, "albumID": albumID })
     setUserRating(newRating)
+  }
+
+  const handleTrackRatingSubmit = async () => {
+    let token
+    try { 
+        token = await getAccessTokenSilently({
+        authorizationParams: {
+          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+        },
+      })}
+      catch (error) {
+        token = await getAccessTokenWithPopup({
+          authorizationParams: {
+            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+          },
+        })
+      }
+    songRatingService.postMultiple({ "ratings": trackRatings, "token": token, "albumID": albumID })
   }
 
   const handleTrackRatingChange = ({ value, trackID }) => {
@@ -203,7 +238,7 @@ const AlbumPage = ({ albumID }) => {
     <AlbumPageDiv>
       <HeadlineDiv>
           <AlbumTitleDiv> {album.name} </AlbumTitleDiv> 
-          <AlbumTitleSublineDiv> by {album.artists[0].name} {albumYear}</AlbumTitleSublineDiv>
+          <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
       </HeadlineDiv>
       <AlbumImg src={album.images[0].url}  /> 
       <ReviewForm 
@@ -216,23 +251,39 @@ const AlbumPage = ({ albumID }) => {
         listenList={listenList}
         setListenList={setListenList}
         userRating={userRating}
+        handleFormSubmit={handleFormSubmit}
       />
       <TracklistDiv>
         <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
         <TracklistTable>
+        <thead>
         <tr>
         <TracklistSubtitleTh style={{ width: "55%" }}> Track title </TracklistSubtitleTh>
         <TracklistSubtitleTh style={{ width: "15%" }}> Len. </TracklistSubtitleTh>
         <TracklistSubtitleTh style={{ width: "30%" }}> Your Rating </TracklistSubtitleTh>
         </tr>
+        </thead>
+        <tbody>
         {album.tracks.total > 0 ? 
           album.tracks.items.map(item => 
           <TrackEntry key={item.uri} trackRatings={trackRatings} handleTrackRatingChange={handleTrackRatingChange} track={item} />)
           : <tr> No tracks to show... </tr>
         }
+        { editMode ? 
+          <tr>
+            <td></td>
+            <td colSpan="2">
+              <Button 
+              sx={{ color: "black", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}
+              onClick={() => handleTrackRatingSubmit()} > 
+              Submit song ratings </Button>
+            </td>
+          </tr> 
+          : null}
+        </tbody>
         </TracklistTable>
+        
       </TracklistDiv>
-      <Button onClick={() => handleFormSubmit()}> Submit </Button>
     </AlbumPageDiv>
     </PageDiv>
   )
