@@ -6,19 +6,40 @@ const followersRouter = require("express").Router()
 //returns users that the userID is following
 followersRouter.get("/following/:userID", async (request, response) => {
     const userID = request.params.userID
-    const followersResponse = await dbpool.query(`SELECT (id_being_followed) 
+    const followingResponse = await dbpool.query(`SELECT (id_being_followed) 
     FROM following
     WHERE follower_id = $1`, [userID])
-    followersResponse.rowCount === 0 ? response.status(204).end() : response.status(200).json(followersResponse.rows)
+    if (followingResponse.rowCount === 0) {
+        response.status(204).end() 
+    } else {
+        let followingRows = followingResponse.rows
+        const following = followingRows.map(row => {
+            Object.keys(row)[0];
+            var key = Object.keys(row)[0];
+            return row[key]
+        })
+        response.status(200).json(following)
+    }
 })
 
 //returns followers of userID
 followersRouter.get("/:userID", async (request, response) => {
     const userID = request.params.userID
-    const followingResponse = await dbpool.query(`SELECT (follower_id) 
+    const followersResponse = await dbpool.query(`SELECT (follower_id) 
     FROM following
     WHERE id_being_followed = $1`, [userID])
-    followingResponse.rowCount === 0 ? response.status(204).end() : response.status(200).json(followingResponse.rows)
+    
+    if (followersResponse.rowCount === 0) {
+        response.status(204).end() 
+    } else {
+        let followerRows = followersResponse.rows
+        const followers = followerRows.map(row => {
+            Object.keys(row)[0];
+            var key = Object.keys(row)[0];
+            return row[key]
+        })
+        response.status(200).json(followers)
+    }
 })
 
 followersRouter.post("/", validateAccessToken, async (request, response) => {

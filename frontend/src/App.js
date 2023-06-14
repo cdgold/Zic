@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react"
 import albumService from "./services/album.js"
 import userService from "./services/user.js"
 import AlbumPage from "./components/AlbumPage.js"
+import AlbumRatings from "./components/AlbumRatings.js"
 import Home from "./components/Home.js"
 import Profile from "./components/Profile.js"
 import Header from "./components/Header.js"
@@ -27,7 +28,8 @@ function App() {
   const [musicSearchText, setMusicSearchText] = useState("")
   const [searchResponse, setSearchResponse] = useState([])
   const [otherUser, setOtherUser] = useState(null)  // used for viewing profiles found from search
-  //const [user, setUser] = useState(null)
+  const [personalAlbumReviews, setPersonalAlbumReviews] = useState([])
+  const [following, setFollowing] = useState([])
   //const [album, setAlbum] = useState(dummyAlbum)
 
   const musicSearchRequest = async () => {
@@ -66,12 +68,28 @@ function App() {
       <RoutesDiv>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/profile/" element={<Profile otherUser={null} otherUserID={null}/>} />
-          <Route path="/profile/:userID" element={<Profile otherUser={otherUser} otherUserID={profileID}/>} />
+          <Route path="/profile/" element={
+            <Profile otherUser={null} 
+              otherUserID={null} 
+              personalAlbumReviews={personalAlbumReviews}
+              setPersonalAlbumReviews={setPersonalAlbumReviews}
+              following = {following}
+              setFollowing={setFollowing}
+            />} 
+          />
+          <Route path="/profile/:userID" element={<Profile following={following} otherUser={otherUser} otherUserID={profileID}/>} />
           <Route path="/search/:query" element={
             <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={setOtherUser} />
-          } />
+          }/>
           <Route path="/album/:id" element={<AlbumPage albumID={albumID} />} />
+          <Route path="/albumRatings/" element={
+            <AlbumRatings 
+              otherUser={null} 
+              otherUserID={null}             
+              personalAlbumReviews={personalAlbumReviews}
+              setPersonalAlbumReviews={setPersonalAlbumReviews}
+            />}
+          />
           <Route path="/error/" element={<div> Something went wrong! Navigate back to the home page. </div>} />
           <Route path="*" element={<Home />} />
         </Routes>

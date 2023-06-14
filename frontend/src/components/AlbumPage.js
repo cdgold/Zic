@@ -133,8 +133,11 @@ const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
   )
 }
 
-const AlbumPage = ({ albumID }) => {
-  const { user, isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+const AlbumPage = ({ albumID, user }) => {
+
+// move spotify shit to backend
+
+  const { isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [editMode, setEditMode] = useState(true)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)

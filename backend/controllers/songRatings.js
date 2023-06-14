@@ -31,7 +31,7 @@ songRatingsRouter.post("/album", validateAccessToken, async (request, response) 
   const trackRatings = request.body.trackRatings
   const albumID = request.body.albumID
   let insertedRows = []
-    for ([trackID, rating] of Object.entries(trackRatings)) {
+    for (const [trackID, rating] of Object.entries(trackRatings)) {
         if (!(isNaN(rating)) && rating !== "" && rating <= 100 && rating >= 0){
                 let songQuery = await dbpool.query(`SELECT (song_id, album_id) FROM "songs" WHERE song_id = $1`, [trackID])
                 if (songQuery.rowCount == 0){

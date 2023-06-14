@@ -12,5 +12,22 @@ const follow = async ({ userID, toFollowID, token }) => {
   return response.data
 }
 
+const unfollow = async ({ userID, toUnfollowID, token }) => {
+    userID = auth0Service.dropStartOfSub(userID)
+    console.log(`user: ${userID}, toUnfollow: ${toUnfollowID}, token: ${token}`)
+    let config = {}
+    config = auth0Service.setHeaderToken({ "config": config, "token": token })
+    const deleteUrl = `${baseUrl}/${toUnfollowID}`
+    const response = await axios.delete(deleteUrl, config)
+    return response.data
+}
 
-export default { follow }
+const getFollowing = async ({ userID }) => {
+    userID = auth0Service.dropStartOfSub(userID)
+    const getUrl = `${baseUrl}/following/${userID}`
+    const response = await axios.get(getUrl)
+    return response.data
+}
+
+
+export default { follow, unfollow, getFollowing }

@@ -13,7 +13,9 @@ albumRatingsRouter.get("/", async (request, response) => {
 // returns all album ratings of a user
 albumRatingsRouter.get("/user/:auth0ID", async (request, response) => {
   const userID = request.params.auth0ID
+  //console.log("User id is: ", userID)
   const albumRatings = await dbpool.query(`SELECT * FROM album_ratings WHERE auth0_id = $1`, [userID])
+  //console.log("albumRatingReturn is: ", albumRatings.rows)
   albumRatings.rowCount === 0 ? response.status(204).end() : response.status(200).json(albumRatings.rows)
 })
   
