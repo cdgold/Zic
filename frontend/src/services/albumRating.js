@@ -7,13 +7,29 @@ const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/albumRatings`
 const getRating = async ({ userID, albumID }) => {
   userID = auth0Service.dropStartOfSub(userID)
   const urlToGet = `${baseUrl}/${userID}/${albumID}`
-  console.log("going to: ", urlToGet)
-  const albumRatingResponse = await axios.get(urlToGet)
+  let albumRatingResponse = await axios.get(urlToGet)
   console.log("albumRatingResponse is", albumRatingResponse)
-  if(albumRatingResponse.status === "204"){
-    return null
+  let albumReview
+  let trackReviews
+  if (albumRatingResponse.status === "200"){
+    albumReview = albumRatingResponse.data.album
+    if (typeof albumReview !== "undefined" && typeof albumReview.rating !== "undefined" && 
+    !(isNaN(typeof albumReview.rating))){
+      albumReview.rating = (albumReview.rating / 10)
+    }
+    trackReviews = albumRatingResponse.data.tracks
+    trackReviews = trackReviews.map((track) => {
+      if (typeof track.rating !== "undefined" && !(isNaN(typeof track.rating))){
+        track.rating = (track.rating / 10)
+      }
+    })
   }
-  return albumRatingResponse.data
+    else { // status is not 200
+      return null
+    }
+  const albumAndTracks = {"album": albumReview, "tracks": trackReviews}
+  console.log("albumAndTracks is: ", albumAndTracks)
+  return albumAndTracks
 }
 
 const postRating = async ({ rating, token }) => {

@@ -34,7 +34,7 @@ albumRatingsRouter.get("/:userID/:albumID", async (request, response) => {
   const foundRatings = {"album": albumRating.rows[0], "tracks": songRatings.rows}
   albumRating.rowCount === 0 ? response.status(204).end() : response.status(200).json(foundRatings)
 })
-  
+
 
 // request.body required parameters: userID, albumID, review (which could contain rating (1-100), reviewText, listenList, listened fields)
 // trackRatings is an array of tracks, made up of [id, rating]

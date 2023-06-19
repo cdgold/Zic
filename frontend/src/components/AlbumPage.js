@@ -10,6 +10,27 @@ import dummyAlbum from "../test/dummyData.js"
 import ReviewForm from "./AlbumReviewForm.js"
 import { useAuth0 } from "@auth0/auth0-react"
 
+const dummyReview = {
+  "album": {
+    "rating": 90,
+    "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
+    "listen_list": false,
+    "album_id": "5zi7WsKlIiUXv09tbGLKsE",
+    "auth0_id": "647a59e1fc60c55ea86431b0",
+    "listened": true,
+    "post_time": "2023-06-13T22:19:30.291Z"
+  },
+  "tracks": [
+    {
+      "song_id": "1hz7SRTGUNAtIQ46qiNv2p",
+      "rating": 99
+    },
+    {
+      "song_id": "5A0M6B0RBSXSNWv0wcppZ9",
+      "rating": 70
+    }
+  ]
+}
 
 const ALBUM_PAGE_DIV_COLUMN_1_PX = 420
 const ALBUM_PAGE_DIV_COLUMN_2_PX = 350
@@ -82,6 +103,7 @@ const TracklistSubtitleTh = styled.th`
   text-align: left;
   font-size: 20px;
   color: black;
+  text-align: center;
   -webkit-text-stroke-width: 0px;
   -webkit-text-stroke-color: black;
 `
@@ -94,7 +116,7 @@ const TracklistTable = styled.table`
   border-spacing: 5px;
 `
 
-const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
+const TrackEntry = ({ track, trackRatings, handleTrackRatingChange, editMode, setEditMode }) => {
 
   // if user is null and they attempt to enter edit mode, redirect to login
 
@@ -118,27 +140,28 @@ const TrackEntry = ({ track, trackRatings, handleTrackRatingChange }) => {
     <td>
       {showTrackLength}
     </td>
-    <td>
-    <TextField
-          sx={{ width: "5em", textAlign: "center" }}
+    <td style={{ textAlign: "center" }}>
+    { editMode  
+      ? <TextField
+          sx={{ width: "4em", textAlign: "center" }}
           value={trackRatings[track.id] || ""}
-          type="number"
+          size="small"
           onChange={event => handleTrackRatingChange({ trackID: track.id, value: event.target.value })}
           InputLabelProps={{
             shrink: true,
           }}
-        />
+        /> 
+      : <span > { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"} </span>
+    } 
     </td>
   </tr>
   )
 }
 
-const AlbumPage = ({ albumID, user }) => {
+const AlbumPage = ({ albumID }) => {
 
-// move spotify shit to backend
-
-  const { isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
-  const [editMode, setEditMode] = useState(true)
+  const { isAuthenticated, user, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const [editMode, setEditMode] = useState(false)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
   const [userRating, setUserRating] = useState(null)
@@ -147,6 +170,9 @@ const AlbumPage = ({ albumID, user }) => {
   const [numberRating, setNumberRating] = useState({value: "", error: ""})
   const [listened, setListened] = useState(false)
   const [listenList, setListenList] = useState(false)
+
+  console.log("userRating", userRating)
+  console.log("trackRatings is: ", trackRatings)
 
   useEffect(() => {
     albumService.getSpotifyAlbum({ "id": albumID }) 
@@ -165,20 +191,33 @@ const AlbumPage = ({ albumID, user }) => {
 
   useEffect(() => {
     
-    if(isAuthenticated && typeof user.sub !== "undefined"){
+    if(isAuthenticated && typeof user !== "undefined" && typeof user.sub !== "undefined"){
     albumRatingService.getRating({ "userID": user.sub, "albumID": albumID })
       .then(returnedRating => {
         console.log("Returned rating is: ", returnedRating)
-        if (returnedRating !== null){
+        if (returnedRating.album !== null){
           setUserRating(returnedRating.album)
         }
         if (typeof returnedRating.tracks !== "undefined") {
-          setTrackRatings(returnedRating.tracks)
+          console.log("Returned rating tracks is: ", returnedRating.tracks)
+          const initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
+            allTracks[current.song_id] = current.rating 
+            console.log("All tracks is now: ", allTracks)
+            return allTracks
+          }, {})
+          setTrackRatings(initialTrackRatings)
         }
       })
-      .catch(error => setUserRating(null))
+      .catch(error => { setUserRating(dummyReview.album); 
+        
+        const initialTrackRatings = dummyReview.tracks.reduce((allTracks, current) => {
+          allTracks[current.song_id] = current.rating 
+          console.log("All tracks is now: ", allTracks)
+          return allTracks
+        }, {})
+        setTrackRatings(initialTrackRatings)})
     }
-  }, [])
+  }, [user])
 
   const handleFormSubmit = async () => {
     const newRating = {
@@ -255,6 +294,8 @@ const AlbumPage = ({ albumID, user }) => {
         setListenList={setListenList}
         userRating={userRating}
         handleFormSubmit={handleFormSubmit}
+        editMode={editMode}
+        setEditMode={setEditMode}
       />
       <TracklistDiv>
         <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
@@ -269,7 +310,14 @@ const AlbumPage = ({ albumID, user }) => {
         <tbody>
         {album.tracks.total > 0 ? 
           album.tracks.items.map(item => 
-          <TrackEntry key={item.uri} trackRatings={trackRatings} handleTrackRatingChange={handleTrackRatingChange} track={item} />)
+          <TrackEntry 
+            key={item.uri} 
+            editMode={editMode} 
+            trackRatings={trackRatings} 
+            handleTrackRatingChange={handleTrackRatingChange} 
+            track={item} 
+            setEditMode={setEditMode}
+            />)
           : <tr> No tracks to show... </tr>
         }
         { editMode ? 

@@ -2,13 +2,13 @@ const dbpool = require("../utils/databaseConfig.js")
 const albumsRouter = require("express").Router()
 const spotifyService = require("../services/spotify.js")
 
-
+/*
 albumsRouter.get("/", async (request, response) => {
   const albums = await dbpool.query(`SELECT * FROM albums`)
 
   response.json(albums.rows)
 })
-
+*/
 
 // checks Spotify api (not Zic database) for query matches
 albumsRouter.get("/searchSpotify/:query", async (request, response) => {

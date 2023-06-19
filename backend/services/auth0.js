@@ -9,6 +9,31 @@ TIME_NEEDED_FOR_REFRESH_SECONDS = 31557600
 let token = null
 let tokenAcquisitionTime = null
 
+const dropStartOfSub = (string) => {
+  return string.split("|").pop()
+}
+
+const trimUserResponse = ({ user }) => {
+  const trimmedUser = {
+    "nickname": user.nickname,
+    "picture": user.picture,
+    "userID": dropStartOfSub(user.user_id)
+  }
+  return trimmedUser
+}
+
+const trimUserResponses = ({ userArray }) => {
+  const trimmedResponses = userArray.map(response => {
+    const trimmedUser = {
+      "nickname": response.nickname,
+      "picture": response.picture,
+      "userID": dropStartOfSub(response.user_id)
+    }
+    return trimmedUser
+  })
+  return trimmedResponses
+}
+
 const setToken = async () => {
     const postUrl = `${process.env.AUTH0_DOMAIN}/oauth/token`
     const options = {
@@ -30,16 +55,28 @@ const checkTokenValidity = async () => {
     }
 }
 
-const getUser = async (ID) => {
-  checkTokenValidity()
+const getUserByID = async (ID) => {
+  await checkTokenValidity()
   const config = {
     "headers": {
       "Authorization": token
     }
   }
-  const getUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users/${ID}`
+  const getUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users/auth0|${ID}`
   const returnUser = await axios.get(getUrl, config)
   return returnUser.data
+}
+
+const patchUser = async ({ patchBody, userID }) => {
+  await checkTokenValidity()
+  const config = {
+    "headers": {
+      "Authorization": token
+    }
+  }
+  const patchUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users/auth0|${userID}`
+  const auth0Response = await axios.patch(patchUrl, patchBody, config)
+  return auth0Response.data
 }
 
 const searchUsersByNickname = async (query) => {
@@ -50,9 +87,33 @@ const searchUsersByNickname = async (query) => {
       "Authorization": token
     }
   }
-  const getUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users?q=nickname:${query} OR nickname:${query}* OR user_id:*${query}&search_engine=v3`
+  const getUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users?q=nickname:${query} OR nickname:${query}*&search_engine=v3`
   const getResponse = await axios.get(getUrl, config)
   return getResponse.data
+}
+
+const getMultipleUsersByID = async ({ toGet }) => {
+  if (Array.isArray(toGet)){
+    await checkTokenValidity()
+    const config = {
+      "headers": {
+        "Authorization": token
+      }
+    }
+    let getUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users?q=user_id:auth0|${toGet[0]}`
+    if (toGet.length > 1){
+      for (let i=1; i < toGet.length; i++){
+        getUrl = `${getUrl} OR user_id:auth0|${toGet[i]}`
+      }
+    }
+    getUrl = `${getUrl}&search_engine=v3`
+    const getResponse = await axios.get(getUrl, config)
+    //console.log("Returning: ", getResponse.data)
+    return getResponse.data
+  }
+  else {
+    throw new Error("Pass toGet as array for function getMultipleUsersByID.")
+  }
 }
 
 
@@ -62,8 +123,11 @@ const validateAccessToken = auth({
   tokenSigningAlg: 'RS256'
 })
 
-const dropStartOfSub = (string) => {
-  return string.split("|").pop()
-}
-
-module.exports = { getUser, searchUsersByNickname, validateAccessToken, dropStartOfSub }
+module.exports = { getUserByID, 
+  searchUsersByNickname, 
+  validateAccessToken, 
+  dropStartOfSub, 
+  patchUser, 
+  getMultipleUsersByID,
+  trimUserResponses,
+  trimUserResponse }

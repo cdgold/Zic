@@ -4,20 +4,12 @@ import { useAuth0 } from "@auth0/auth0-react"
 import albumRatingService from "../services/albumRating.js"
 import albumService from "../services/album.js"
 import spotifyService from "../services/spotify.js"
+import AlbumCard from "../styling/reusable/AlbumCard.js"
 import { useLocation } from "react-router-dom"
 
 const NUMBER_OF_ALBUMS_PER_PAGE = 20
 
 // can sort by ratingDescending, mostRecent
-
-const AlbumCard = ({ review, album }) => {
-    return(
-      <div>
-        {review.rating}
-        {album.title}
-      </div>
-    )
-  }
 
 const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUserID }) => {
   
@@ -75,7 +67,8 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
           */
         } else { // personal album ratings have already been fetched by other page
           console.log("Didn't refetch")
-          setAlbumReviews(personalAlbumReviews)
+          const newPersonalAlbumReviews = [...personalAlbumReviews]
+          setAlbumReviews(newPersonalAlbumReviews)
         }
     }, [user])
     
@@ -98,7 +91,16 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
           "auth0_id": "647a59e1fc60c55ea86431b0",
           "listened": true,
           "post_time": "2023-06-13T22:19:30.291Z"
-      }
+      },
+      {
+    "rating": 90,
+    "review_text": "Could not be easier to listen to",
+    "listen_list": false,
+    "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
+    "auth0_id": "647a59e1fc60c55ea86431b0",
+    "listened": true,
+    "post_time": "2023-06-15T19:07:48.893Z"
+       }
   ])}, [])
   */
   
@@ -106,19 +108,22 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
       if(albumReviews.length !== 0){
         let sortedAlbums
         if (sortBy === "mostRecent") {
+          console.log("sorting by most recent")
           sortedAlbums = albumReviews.sort((a, b) => {
           const aDate = Date.parse(a.post_time)
           const bDate = Date.parse(b.post_time)
           return bDate - aDate
         })
-        } else if (sortBy == "ratingDescending") {
+        } else if (sortBy === "ratingDescending") {
           sortedAlbums = albumReviews.sort((a, b) => {
-            return a.rating - b.rating
+            return b.rating - a.rating
           })
         } else {
+            console.log("not sorted")
             sortedAlbums = albumReviews
         }
         let sortedAlbumsShortened = sortedAlbums.slice(0, NUMBER_OF_ALBUMS_PER_PAGE)
+        console.log("Sorted albums are now: ", sortedAlbumsShortened)
         setSortedAlbums(sortedAlbumsShortened)
       }
     }, [albumReviews, sortBy])
@@ -156,24 +161,24 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     }
     return(
       <div>
-          { spotifyTokenReady ?
+          {/* spotifyTokenReady ?
             <button onClick={() => spotifyService.getMostPlayed()}> Get your most listened artists! </button>
             : <button onClick={() => spotifyService.getUserAuthorization()}> Authorize spotify! </button>
-          }
+          */}
           Profile of {otherUserID === null ? user.nickname : "other user nickname here"}!
           <div> {otherUserID === null ? "Your" : "Their" } reviews </div>
           {(sortedAlbums.length > 0) && (albumInfo.length > 0) ?
           <div>
             <Select
-                value={sortBy}
-                onChange={event => setSortBy(event.target.value)}
-                inputProps={{ 'aria-label': 'Sort by' }}
-        >
+              value={sortBy}
+              onChange={event => setSortBy(event.target.value)}
+              inputProps={{ 'aria-label': 'Sort by' }}
+            >
           <MenuItem value={"ratingDescending"}> {`Rating (high to low)`}</MenuItem>
           <MenuItem value={"mostRecent"}> {`Post time (most to least recent)`}</MenuItem>
-        </Select>
+            </Select>
             {sortedAlbums.map((review) => {
-              return(<AlbumCard review={review} album={albumInfo.find((album) => album.id === review.album_id)}/>)
+              return(<AlbumCard  review={review} allAlbumInfo={albumInfo} />)
             })}
             </div>
           : <div> No reviews. </div>}

@@ -29,7 +29,7 @@ function App() {
   const [searchResponse, setSearchResponse] = useState([])
   const [otherUser, setOtherUser] = useState(null)  // used for viewing profiles found from search
   const [personalAlbumReviews, setPersonalAlbumReviews] = useState([])
-  const [following, setFollowing] = useState([])
+  const [following, setFollowing] = useState(null)  // array of users being followed
   //const [album, setAlbum] = useState(dummyAlbum)
 
   const musicSearchRequest = async () => {
@@ -55,7 +55,7 @@ function App() {
   
   const profileMatch = useMatch("/profile/:userID")
   const profileID = profileMatch ?
-    profileMatch.params.id
+    profileMatch.params.userID
     : null 
   return (
     <div>
@@ -67,17 +67,26 @@ function App() {
       </Header>
       <RoutesDiv>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile/" element={
-            <Profile otherUser={null} 
-              otherUserID={null} 
+          <Route path="/" element={<Home following={following} setFollowing={setFollowing} />} />
+          <Route path="/profile/:userID" element={
+            <Profile 
+              otherUser={otherUser} 
+              setOtherUser={setOtherUser}
+              otherUserID={profileID}
+              following={following}
+              setFollowing={setFollowing}
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
+              />} />
+          <Route path="/profile/" element={
+            <Profile 
+              otherUser={null} 
+              otherUserID={null}
               following = {following}
-              setFollowing={setFollowing}
-            />} 
-          />
-          <Route path="/profile/:userID" element={<Profile following={following} otherUser={otherUser} otherUserID={profileID}/>} />
+              setFollowing = {setFollowing}
+              personalAlbumReviews={personalAlbumReviews}
+              setPersonalAlbumReviews={setPersonalAlbumReviews}
+              />} />
           <Route path="/search/:query" element={
             <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={setOtherUser} />
           }/>

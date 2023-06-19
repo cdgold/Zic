@@ -21,25 +21,18 @@ usersRouter.get("/", async (request, response) => {
   response.json(returnUser)
 })
 
-usersRouter.get("/:authID", async (request, response) => {
-  const ID = request.params.authID
-  const returnUser = await auth0Service.getUser(ID)
-  console.log(`response is: `, returnUser)
-  response.json(returnUser)
+usersRouter.get("/:auth0ID", async (request, response) => {
+  const ID = request.params.auth0ID
+  const returnUser = await auth0Service.getUserByID(ID)
+  const trimmedUser = auth0Service.trimUserResponse({ "user": returnUser })
+  response.status(200).json(trimmedUser)
 })
 
 usersRouter.get("/search/:query", async (request, response) => {
   const query = request.params.query
   const auth0Response = await auth0Service.searchUsersByNickname(query)
-  const trimmedResponses = auth0Response.map(response => {
-      const trimmedUser = {
-        "nickname": response.nickname,
-        "picture": response.picture,
-        "userID": auth0Service.dropStartOfSub(response.user_id)
-      }
-      return trimmedUser
-    })
-  response.json(trimmedResponses)
+  const trimmedResponses = auth0Service.trimUserResponses({ "userArray": auth0Response })
+  response.status(200).json(trimmedResponses)
 })
 
 // need auth0ID and displayName
@@ -57,6 +50,22 @@ usersRouter.post("/", async (request, response) => {
   }
   const newUser = await dbpool.query(`INSERT INTO "users" (displayName, auth0_id) VALUES ($1, $2)`, [request.body.displayName, request.body.auth0ID])
   response.json({ "displayName": response.body.displayName, "auth0ID": response.body.auth0ID })
+})
+
+usersRouter.patch("/", auth0Service.validateAccessToken, async (request, response) => {
+  const userSub = request.auth.payload.sub
+  let changes = {}
+  if (typeof request.body.nickname !== "undefined"){
+    changes["nickname"] = request.body.nickname
+  } 
+  if (typeof request.body.picture !== "undefined"){
+    picture = picture.replace(/\s/g, '')
+    if(picture.length > 0){
+      changes["picture"] = request.body.picture
+    }
+  }
+  const auth0Response = await auth0Service.patchUser({ "patchBody": changes, "userSub": userSub })
+  return response.status(200).json(auth0Response)
 })
 
 

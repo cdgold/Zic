@@ -56,16 +56,11 @@ const getWithID = async ({ id, type }) => {
 const getMultipleWithID = async ({ ids, type }) => {
   await checkTokenValidity()
   let config = {}
-  if(token !== null){
     config = {
       headers:{
         "Authorization": token
       }
     }
-  }
-  else {
-    throw new Error("Set Spotify API key first.")
-  }
   if (ACCEPTABLE_SEARCH_TYPES.includes(type)){
     let getRequestUrl = `${SPOTIFY_BASE_URL}/${type}s/?ids=`
     ids.forEach((id, index) => {

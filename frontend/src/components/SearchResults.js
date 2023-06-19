@@ -88,7 +88,7 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
           )})
         : <div> No albums to show. </div>}
         User search for: {searchQuery}
-        {typeof searchResponse.users !== "undefined" && searchResponse.users !== [] ?
+        {typeof searchResponse.users !== "undefined" && searchResponse.users.length > 0 ?
         searchResponse.users.map(result => {
           console.log(result)
           const userID = result.userID

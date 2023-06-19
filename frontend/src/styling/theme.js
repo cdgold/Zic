@@ -9,7 +9,7 @@ const theme = {
   fonts: {
     sizes: {
       titleSmall: "24px",
-      bodyBig: "18px",
+      bodyLarge: "20px",
       bodyMedium: "14px",
       bodySmall: "10px"
     }
@@ -18,14 +18,11 @@ const theme = {
     primaryOne: "#FF0000",
     primaryTwo: "#0047FF",
     primaryThree: "#FFFFFF",
+    error: "#8a3630"
   },
-  titleFonts: "Archivo Black, Archivo, sans-serif",
-  bodyFonts: "Archivo, sans-serif",
-  fontSizes: {
-    small: "1em",
-    medium: "2em",
-    large: "3em"
-  }
+  titleFonts: `"Archivo Black", "Archivo", sans-serif`,
+  bodyFonts: `"Archivo", sans-serif`,
+  minimumPageWidth: "600px"
 }
 
 export default theme

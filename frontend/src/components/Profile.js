@@ -1,37 +1,57 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
+import styled from "styled-components"
+
 import albumRatingService from "../services/albumRating.js"
 import spotifyService from "../services/spotify.js"
 import albumService from "../services/album.js"
 import followerService from "../services/follower.js"
+import userService from "../services/user.js"
 import { Link, useLocation } from "react-router-dom"
-//import userService from "../services/user.js"
+import AlbumCard from "../styling/reusable/AlbumCard.js"
+import ProfileModal from "./ProfileModal.js"
+
+//import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
 
 const NUMBER_OF_ALBUMS_SHOWN = 4
 
-const AlbumCard = ({ review, album }) => {
-  return(
-    <div>
-      {review.rating}
-      {album.name} by {album.artists[0].name}
-    </div>
-  )
-}
+const MostRecentBlock = styled.div`
+  width: 100vw;
+  min-width: 600px;
+  display: flex;
+  gap: 25px;
+`
 
-// p
+const MostRecentItem = styled.div`
+  min-width: 150px;
+  width: 20vw;
+`
 
-const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPersonalAlbumReviews, following, setFollowing }) => {
+const Header = styled.div`
+  font-family: ${props => props.theme.titleFonts};
+  fontSize: ${props => props.fontSize};
+`
+
+const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, setPersonalAlbumReviews, following, setFollowing }) => {
   // on first log in, make user set a UNIQUE(?) nickname
-  // need to get following information
-  // follow button should be unfollow if already following
+  // should setOtherUser if not populated
 
   const { user, isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [ albumReviews, setAlbumReviews ] = useState([])
   const [ mostRecentAlbums, setMostRecentAlbums ] = useState([])
   const [ albumInfo, setAlbumInfo ] = useState([])
+  const [ modalIsOpen, setModalIsOpen ] = useState(false)
 
+console.log("albumReviews: ", albumReviews)
+console.log("albumInfo: ", albumInfo)
+console.log("otherUserID: ", otherUserID)
+//console.log("MRAlbums: ", mostRecentAlbums)
+//console.log("albumInfo: ", albumInfo)
+//console.log("dummys", dummySpotifyAlbums)
+
+  
   useEffect(() => {
-    if(following.length === 0 && user !== undefined && user.sub !== undefined){
+    if(following === null && user !== undefined && user.sub !== undefined){
       followerService.getFollowing({ "userID": user.sub })
         .then((followingResponse) => {
           setFollowing(followingResponse)
@@ -39,9 +59,19 @@ const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPer
         .catch((error) => {
           setFollowing([])
         })
-      
     }
   }, [user])
+
+  useEffect(() => {     // fetches otherUser if not already there
+    if (otherUserID !== null) { 
+      if ((otherUser === null) || (typeof otherUser !== "undefined" && typeof otherUser.id !== "undefined" && otherUserID !== otherUser.id)){
+        otherUser = userService.getUserProfile({ userID: otherUser.id })
+          .then((response) => {
+            setOtherUser(response)
+          })
+      }
+    }
+  }, [otherUserID])
 
   useEffect(() => {     // fetches album ratings
     if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length === 0){
@@ -52,20 +82,22 @@ const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPer
               setPersonalAlbumReviews(reviews)
             })
             .catch((error) => { setAlbumReviews([]) })
-      } else if (otherUserID !== null){
-          albumRatingService.getAllUserRatings({ "userID": otherUserID })
-            .then((reviews) => {
-              setAlbumReviews(reviews)
-            })
-          .catch((error) => { setAlbumReviews([]) })
+        } else if (otherUser.id !== null){
+            console.log("fetching allUserRatings for: ", otherUserID)
+            albumRatingService.getAllUserRatings({ "userID": otherUserID })
+              .then((reviews) => {
+                setAlbumReviews(reviews)
+              })
+            .catch((error) => { setAlbumReviews([]) })
         }
       } else { // personal album ratings have already been fetched
         console.log("Didn't refetch")
-        setAlbumReviews(personalAlbumReviews)
+        const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
+        setAlbumReviews(newPersonalAlbumReviews)
       }
-  }, [user])
+  }, [user, otherUser])
   
-/*
+  /*
   useEffect(() => {setAlbumReviews([
     {
         "rating": 9,
@@ -84,8 +116,20 @@ const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPer
         "auth0_id": "647a59e1fc60c55ea86431b0",
         "listened": true,
         "post_time": "2023-06-13T22:19:30.291Z"
-    }
+    },
+    {
+      "rating": 90,
+      "review_text": "Could not be easier to listen to",
+      "listen_list": false,
+      "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
+      "auth0_id": "647a59e1fc60c55ea86431b0",
+      "listened": true,
+      "post_time": "2023-06-15T19:07:48.893Z"
+         }
 ])}, [])
+
+
+useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
 */
 
   useEffect(() => { // sorts album ratings by time posted, truncates
@@ -132,10 +176,13 @@ const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPer
         }
       try{
         await followerService.follow({ "userID": user.sub, "toFollowID": otherUser["userID"], "token": token })
-        const newFollowing = [ ...following, otherUser["userID"] ]
+        const newFollowing = [ ...following, {
+          "user_id": otherUser["userID"],
+          "nickname": otherUser["nickname"],
+          "picture": otherUser["picture"]
+        } ]
         setFollowing(newFollowing)
       } catch(error){
-
       }
      }
   }
@@ -185,21 +232,26 @@ const Profile = ({ setUser, otherUser, otherUserID, personalAlbumReviews, setPer
   }
   return(
     <div>
-        Profile of {otherUserID === null ? user.nickname : otherUser.nickname}!
+        <Header fontSize={"40px"}> {otherUserID === null ? user.nickname : otherUser.nickname} </Header >
+        {otherUserID === null ? < button onClick={(() => {setModalIsOpen(true)})} > edit profile </button> : null}
+        <ProfileModal user={user} isOpen={modalIsOpen} setIsOpen={(setModalIsOpen)} ></ProfileModal>
         { (otherUserID !== null && isAuthenticated) ? 
-          <> {typeof (following.find(user => user.id === otherUserID)) === "undefined" ? 
+          <> {(Array.isArray(following) && typeof (following.find(user => user.id === otherUserID)) === "undefined") ? 
                <button onClick={() => handleFollow()}> Follow </button> 
                : <button onClick={() => handleUnfollow()}> Unfollow </button>} 
           </>
           : null}
-        <div> {otherUserID === null ? "Your" : "Their" } most recent reviews </div>
+        <Header fontSize={"24px"} > {otherUserID === null ? "Your" : "Their" } most recent reviews </Header>
         {((typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length > 0) && (typeof albumInfo !== "undefined" && albumInfo.length > 0)) ? 
-          <div> 
+          <MostRecentBlock> 
           {mostRecentAlbums.map((review) => {
-            return(<AlbumCard review={review} album={albumInfo.find((album) => album.id === review.album_id)}/>)
+            return(
+              <MostRecentItem key={review.album_id}> 
+                <AlbumCard  review={review} allAlbumInfo={albumInfo} />
+              </MostRecentItem>)
           })}
           <Link to="/albumRatings/"> more reviews </Link>
-          </div>
+          </MostRecentBlock>
           : <div> No reviews. </div>}
     </div>
   )
