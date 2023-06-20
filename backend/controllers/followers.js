@@ -76,7 +76,8 @@ followersRouter.get("/following/posts/:userID", async (request, response) => {
       FROM following
       JOIN album_ratings 
       ON album_ratings.auth0_id = following.id_being_followed 
-      WHERE following.follower_id = $1;`, queryVals)
+      WHERE following.follower_id = $1
+      ORDER BY post_time DESC;`, queryVals)
     //console.log("postResponse: ", postResponse.rows)
     if (postResponse.rowCount === 0){
       return response.status(204).end()

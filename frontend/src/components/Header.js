@@ -13,9 +13,9 @@ const HeaderDiv = styled.div`
   justify-items: center;
   top: 0;
   left: 0;
-  height: 3em;
+  height: 3rem;
   width: 100vw;
-  min-width: 520px;
+  min-width: 30rem;
   background-color: white;
   overflow:auto;
   z-index: 10;
@@ -25,7 +25,7 @@ const TopRightBar = styled.div`
   position: absolute;
   height: 1.5em;
   top: .75em;
-  right: 10px;   
+  right: 1em;   
   display: flex;
   align-items: center;
 `
@@ -105,6 +105,7 @@ const Header = ({ musicSearchRequest, setMusicSearchText }) => {
           onKeyUp = {(event) => { if(event.key === "Enter"){
             musicSearchRequest()
           }}}
+          placeholder={`Search albums/users`}
           sx={{ color: theme.colors.primaryOne  }}
           onChange = {(event) => setMusicSearchText(event.target.value)}
           variant = "standard"

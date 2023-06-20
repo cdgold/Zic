@@ -8,10 +8,13 @@ const theme = {
   headerMargin: "3em",
   fonts: {
     sizes: {
-      titleSmall: "24px",
-      bodyLarge: "20px",
-      bodyMedium: "14px",
-      bodySmall: "10px"
+      header: "4.0rem",
+      titleMedium: "2.0rem",
+      titleSmall: "1.8rem",
+      titleTiny: "1.5rem",
+      bodyLarge: "1.2rem",
+      bodyMedium: "1rem",
+      bodySmall: ".8rem"
     }
   },
   colors: {

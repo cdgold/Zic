@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
-import styled from "styled-components"
+import styled, { useTheme } from "styled-components"
 
 import albumRatingService from "../services/albumRating.js"
 import spotifyService from "../services/spotify.js"
@@ -11,34 +11,39 @@ import { Link, useLocation } from "react-router-dom"
 import AlbumCard from "../styling/reusable/AlbumCard.js"
 import ProfileModal from "./ProfileModal.js"
 
-//import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
+import { Button } from "@mui/material"
+
+import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
 
 const NUMBER_OF_ALBUMS_SHOWN = 4
+const MAX_REVIEW_TEXT_CHARACTERS  = 50
 
-const MostRecentBlock = styled.div`
+const AlbumRow = styled.div`
   width: 100vw;
-  min-width: 600px;
+  min-width: 40rem;
   display: flex;
-  gap: 25px;
+  gap: 1rem;
 `
 
-const MostRecentItem = styled.div`
-  min-width: 150px;
+const AlbumRowItem = styled.div`
+  min-width: 10rem;
   width: 20vw;
 `
 
 const Header = styled.div`
   font-family: ${props => props.theme.titleFonts};
-  fontSize: ${props => props.fontSize};
+  font-size: ${props => props.fontSize};
 `
 
 const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, setPersonalAlbumReviews, following, setFollowing }) => {
   // on first log in, make user set a UNIQUE(?) nickname
-  // should setOtherUser if not populated
+
+  const theme = useTheme()
 
   const { user, isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [ albumReviews, setAlbumReviews ] = useState([])
   const [ mostRecentAlbums, setMostRecentAlbums ] = useState([])
+  const [ favoriteAlbums, setFavoriteAlbums ] = useState([])
   const [ albumInfo, setAlbumInfo ] = useState([])
   const [ modalIsOpen, setModalIsOpen ] = useState(false)
 
@@ -48,7 +53,63 @@ console.log("otherUserID: ", otherUserID)
 //console.log("MRAlbums: ", mostRecentAlbums)
 //console.log("albumInfo: ", albumInfo)
 //console.log("dummys", dummySpotifyAlbums)
+useEffect(() => {setAlbumReviews([
+  {
+      "rating": "9.9",
+      "review_text": "First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"",
+      "listen_list": false,
+      "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
+      "auth0_id": "647a59e1fc60c55ea86431b0",
+      "listened": true,
+      "post_time": "2023-06-13T20:10:58.467Z"
+  },
+  {
+      "rating": "5.0",
+      "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
+      "listen_list": false,
+      "album_id": "5zi7WsKlIiUXv09tbGLKsE",
+      "auth0_id": "647a59e1fc60c55ea86431b0",
+      "listened": true,
+      "post_time": "2023-06-13T22:19:30.291Z"
+  },
+  {
+    "rating": "1.0",
+    "review_text": "Could not be easier to listen to",
+    "listen_list": false,
+    "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
+    "auth0_id": "647a59e1fc60c55ea86431b0",
+    "listened": true,
+    "post_time": "2023-06-15T19:07:48.893Z"
+       }
+])}, [])
 
+useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
+
+/*
+
+useEffect(() => {     // fetches album ratings
+  if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length === 0){
+      if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
+        albumRatingService.getAllUserRatings({ "userID": user.sub })
+          .then((reviews) => {
+            setAlbumReviews(reviews)
+            setPersonalAlbumReviews(reviews)
+          })
+          .catch((error) => { setAlbumReviews([]) })
+      } else if (otherUserID !== null){
+          console.log("fetching allUserRatings for: ", otherUserID)
+          albumRatingService.getAllUserRatings({ "userID": otherUserID })
+            .then((reviews) => {
+              setAlbumReviews(reviews)
+            })
+          .catch((error) => { setAlbumReviews([]) })
+      }
+    } else { // personal album ratings have already been fetched
+      console.log("Didn't refetch")
+      const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
+      setAlbumReviews(newPersonalAlbumReviews)
+    }
+}, [user, otherUser])
   
   useEffect(() => {
     if(following === null && user !== undefined && user.sub !== undefined){
@@ -73,77 +134,6 @@ console.log("otherUserID: ", otherUserID)
     }
   }, [otherUserID])
 
-  useEffect(() => {     // fetches album ratings
-    if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length === 0){
-        if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
-          albumRatingService.getAllUserRatings({ "userID": user.sub })
-            .then((reviews) => {
-              setAlbumReviews(reviews)
-              setPersonalAlbumReviews(reviews)
-            })
-            .catch((error) => { setAlbumReviews([]) })
-        } else if (otherUser.id !== null){
-            console.log("fetching allUserRatings for: ", otherUserID)
-            albumRatingService.getAllUserRatings({ "userID": otherUserID })
-              .then((reviews) => {
-                setAlbumReviews(reviews)
-              })
-            .catch((error) => { setAlbumReviews([]) })
-        }
-      } else { // personal album ratings have already been fetched
-        console.log("Didn't refetch")
-        const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
-        setAlbumReviews(newPersonalAlbumReviews)
-      }
-  }, [user, otherUser])
-  
-  /*
-  useEffect(() => {setAlbumReviews([
-    {
-        "rating": 9,
-        "review_text": "First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"",
-        "listen_list": false,
-        "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
-        "auth0_id": "647a59e1fc60c55ea86431b0",
-        "listened": true,
-        "post_time": "2023-06-13T20:10:58.467Z"
-    },
-    {
-        "rating": 90,
-        "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
-        "listen_list": false,
-        "album_id": "5zi7WsKlIiUXv09tbGLKsE",
-        "auth0_id": "647a59e1fc60c55ea86431b0",
-        "listened": true,
-        "post_time": "2023-06-13T22:19:30.291Z"
-    },
-    {
-      "rating": 90,
-      "review_text": "Could not be easier to listen to",
-      "listen_list": false,
-      "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
-      "auth0_id": "647a59e1fc60c55ea86431b0",
-      "listened": true,
-      "post_time": "2023-06-15T19:07:48.893Z"
-         }
-])}, [])
-
-
-useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
-*/
-
-  useEffect(() => { // sorts album ratings by time posted, truncates
-    if(typeof albumReviews !== "undefined" && albumReviews.length !== 0){
-      let sortedAlbums = albumReviews.sort((a, b) => {
-        const aDate = Date.parse(a.post_time)
-        const bDate = Date.parse(b.post_time)
-        return bDate - aDate
-      })
-      let sortedAlbumsShortened = sortedAlbums.slice(0, NUMBER_OF_ALBUMS_SHOWN)
-      setMostRecentAlbums(sortedAlbumsShortened)
-    }
-  }, [albumReviews])
-
   useEffect(() => { // gets spotify info of album ratings
     if(typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length !== 0){
       const albumsToGet = mostRecentAlbums.reduce((allAlbumInfo, currentReview) => {
@@ -157,6 +147,36 @@ useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
         .catch((error) => {setAlbumInfo(null)})
     }
   }, [mostRecentAlbums])
+*/
+
+const MoreReviewsButton = () => {
+  const theme = useTheme()
+
+  return(
+    <Link style={{ alignSelf: "center" }} to="/albumRatings/">
+      <Button sx={{ color: "black", fontFamily: theme.titleFonts }}>
+        more reviews 
+      </Button>
+    </Link>
+  )
+}
+
+useEffect(() => { // sorts album ratings by time posted, truncates
+  if(typeof albumReviews !== "undefined" && albumReviews.length !== 0){
+    let sortedAlbums = albumReviews.sort((a, b) => {
+      const aDate = Date.parse(a.post_time)
+      const bDate = Date.parse(b.post_time)
+      return bDate - aDate
+    })
+    let sortedAlbumsShortened = sortedAlbums.slice(0, NUMBER_OF_ALBUMS_SHOWN)
+    setMostRecentAlbums(sortedAlbumsShortened)
+    let bestAlbums = albumReviews.sort((a, b) => {
+      return b.rating - a.rating
+    })
+    let bestAlbumsShortened = bestAlbums.slice(0, NUMBER_OF_ALBUMS_SHOWN)
+    setFavoriteAlbums(bestAlbumsShortened)
+  }
+}, [albumReviews])
 
   const handleFollow = async () => {
     if (isAuthenticated) {  
@@ -186,6 +206,7 @@ useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
       }
      }
   }
+
 
   const handleUnfollow = async () => {
     if (isAuthenticated) {  
@@ -232,27 +253,45 @@ useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
   }
   return(
     <div>
-        <Header fontSize={"40px"}> {otherUserID === null ? user.nickname : otherUser.nickname} </Header >
-        {otherUserID === null ? < button onClick={(() => {setModalIsOpen(true)})} > edit profile </button> : null}
-        <ProfileModal user={user} isOpen={modalIsOpen} setIsOpen={(setModalIsOpen)} ></ProfileModal>
-        { (otherUserID !== null && isAuthenticated) ? 
-          <> {(Array.isArray(following) && typeof (following.find(user => user.id === otherUserID)) === "undefined") ? 
-               <button onClick={() => handleFollow()}> Follow </button> 
-               : <button onClick={() => handleUnfollow()}> Unfollow </button>} 
-          </>
-          : null}
-        <Header fontSize={"24px"} > {otherUserID === null ? "Your" : "Their" } most recent reviews </Header>
-        {((typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length > 0) && (typeof albumInfo !== "undefined" && albumInfo.length > 0)) ? 
-          <MostRecentBlock> 
-          {mostRecentAlbums.map((review) => {
-            return(
-              <MostRecentItem key={review.album_id}> 
-                <AlbumCard  review={review} allAlbumInfo={albumInfo} />
-              </MostRecentItem>)
-          })}
-          <Link to="/albumRatings/"> more reviews </Link>
-          </MostRecentBlock>
-          : <div> No reviews. </div>}
+      <div style={{ display: "flex", columnGap: "1rem" }}>
+        <img 
+          src={otherUserID === null ? user.picture : otherUser.picture}
+          style={{ borderRadius: "50%" }}
+          alt={"Profile picture"}
+        />
+        <Header fontSize={`${theme.fonts.sizes.header}`}> {otherUserID === null ? user.nickname : otherUser.nickname} </Header >
+      </div>
+      {otherUserID === null ? < button onClick={(() => {setModalIsOpen(true)})} > edit profile </button> : null}
+      <ProfileModal user={user} isOpen={modalIsOpen} setIsOpen={(setModalIsOpen)} ></ProfileModal>
+      { (otherUserID !== null && isAuthenticated) ? 
+        <> {(Array.isArray(following) && typeof (following.find(user => user.id === otherUserID)) === "undefined") ? 
+              <button onClick={() => handleFollow()}> Follow </button> 
+              : <button onClick={() => handleUnfollow()}> Unfollow </button>} 
+        </>
+        : null}
+      <Header fontSize={`${theme.fonts.sizes.titleTiny}`} > {otherUserID === null ? "Your" : "Their" } favorite albums </Header>
+        {((typeof favoriteAlbums !== "undefined" && favoriteAlbums.length > 0) && (typeof albumInfo !== "undefined" && albumInfo.length > 0)) ? 
+          <AlbumRow> 
+          {favoriteAlbums.map((review) => {
+          return(
+            <AlbumRowItem key={review.album_id}> 
+              <AlbumCard review={review} allAlbumInfo={albumInfo} maxChar={MAX_REVIEW_TEXT_CHARACTERS} />
+            </AlbumRowItem>)})}
+            <MoreReviewsButton />
+          </AlbumRow>
+        : <div> No reviews. </div>}
+      <Header fontSize={`${theme.fonts.sizes.titleTiny}`} > {otherUserID === null ? "Your" : "Their" } most recent reviews </Header>
+      {((typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length > 0) && (typeof albumInfo !== "undefined" && albumInfo.length > 0)) ? 
+        <AlbumRow> 
+        {mostRecentAlbums.map((review) => {
+          return(
+            <AlbumRowItem key={review.album_id}> 
+              <AlbumCard  review={review} allAlbumInfo={albumInfo} maxChar={MAX_REVIEW_TEXT_CHARACTERS} />
+            </AlbumRowItem>)
+        })}
+          <MoreReviewsButton />
+        </AlbumRow>
+        : <div> No reviews. </div>}
     </div>
   )
 }

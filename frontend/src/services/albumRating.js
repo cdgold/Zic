@@ -4,6 +4,20 @@ import auth0Service from "./auth0.js"
 
 const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/albumRatings`
 
+const stringifyRating = ({ rating }) => {
+  let ratingString = `${rating}`
+  if (ratingString.length === 1){
+    ratingString = `0.${ratingString}`
+  }
+  else if (ratingString.length === 2){
+    ratingString = ratingString[0] + "." + ratingString[1]
+  }
+  else {  // rating string 3 digits, must be 10.0
+    ratingString = "10.0"
+  }
+  return ratingString
+}
+
 const getRating = async ({ userID, albumID }) => {
   userID = auth0Service.dropStartOfSub(userID)
   const urlToGet = `${baseUrl}/${userID}/${albumID}`
@@ -13,15 +27,15 @@ const getRating = async ({ userID, albumID }) => {
   let trackReviews
   if (albumRatingResponse.status === "200"){
     albumReview = albumRatingResponse.data.album
-    if (typeof albumReview !== "undefined" && typeof albumReview.rating !== "undefined" && 
-    !(isNaN(typeof albumReview.rating))){
-      albumReview.rating = (albumReview.rating / 10)
+    if (typeof albumReview !== "undefined" && typeof albumReview.rating !== "undefined"){
+      albumReview.rating = stringifyRating({ "rating": albumReview.rating })
     }
     trackReviews = albumRatingResponse.data.tracks
     trackReviews = trackReviews.map((track) => {
       if (typeof track.rating !== "undefined" && !(isNaN(typeof track.rating))){
-        track.rating = (track.rating / 10)
+        track.rating = stringifyRating({ "rating": track.rating })
       }
+      return(track)
     })
   }
     else { // status is not 200

@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react"
+// import { StyleSheet } from "react-native"
 import { FormControl, TextField, Button } from "@mui/material"
 import styled, { useTheme } from "styled-components"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faMusic, faList } from "@fortawesome/free-solid-svg-icons"
+
+const MAX_REVIEW_LENGTH = 1000
 
 const ReviewFormDiv = styled.div`
   display: grid;
@@ -40,6 +45,9 @@ const ErrorText = styled.div`
   grid-column: 1 / span 3;
   grid-row: 3;
   text-align: right;
+`
+
+const StyledMusic = styled(faMusic)`
 `
 
 const ReviewForm = ({ textReview, 
@@ -103,6 +111,10 @@ const ReviewForm = ({ textReview,
     <div>
         <FormControl >
         <ReviewFormDiv>
+          <div>
+            <FontAwesomeIcon icon={faMusic} />
+          </div>
+        <FontAwesomeIcon icon={faList} />
         <button style={{ gridColumn: "1 / span 2", gridRow: 1 }} onClick={() => setListened(!listened)} > 
         {listened ? "Listened" : "Listened?"}
         </button>
@@ -130,10 +142,14 @@ const ReviewForm = ({ textReview,
           ? <TextField
               sx={{ width: "95%" }}
               value={textReview}
-              onChange={e => setTextReview(e.target.value)}
+              onChange={e => {
+                if (e.target.value.length < MAX_REVIEW_LENGTH){
+                  setTextReview(e.target.value)
+                }
+              }}
               placeholder = "Review the album here..."
               multiline
-              rows={4}
+              rows={5}
           />
           : <div onClick={() => setEditMode(true)}> { textReview !== "" ? textReview : `None` } </div>
           }
