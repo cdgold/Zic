@@ -1,17 +1,44 @@
 import React, { useState, useEffect } from "react"
 // import { StyleSheet } from "react-native"
 import { FormControl, TextField, Button } from "@mui/material"
-import styled, { useTheme } from "styled-components"
+import styled, { useTheme, keyframes } from "styled-components"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMusic, faList } from "@fortawesome/free-solid-svg-icons"
 
 const MAX_REVIEW_LENGTH = 1000
 
+const squishAndBounce = keyframes`
+  0% {
+    transform: scale3d(1, 1, 1);
+  }
+  30% {
+    transform: scale3d(1.25, 0.75, 1);
+  }
+  40% {
+    transform: scale3d(0.75, 1.25, 1);
+  }
+  50% {
+    transform: scale3d(1.15, 0.85, 1);
+  }
+  65% {
+    transform: scale3d(0.95, 1.05, 1);
+  }
+  75% {
+    transform: scale3d(1.05, 0.95, 1);
+  }
+  100% {
+    transform: scale3d(1, 1, 1);
+  }
+`
+
 const ReviewFormDiv = styled.div`
   display: grid;
+  align-items: center;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-template-rows: 1fr, 3fr, 1fr;
-  width: 400px;
+  grid-template-rows: min-content, min-content, min-content, min-content;
+  width: 100%;
+  font-family: ${props => props.theme.bodyFonts};
+  font-size: ${props => props.theme.fonts.sizes.bodyMedium};
 `
 
 const FormTitle = styled.div`
@@ -21,33 +48,66 @@ const FormTitle = styled.div`
 `
 
 const FormText = styled.div`
-  font-family: ${props => props.theme.bodyFonts};
-  font-size: ${props => props.theme.fonts.sizes.bodyMedium};
+  
 `
 
 const RatingText = styled.div`
-font-family: ${props => props.theme.titleFonts};
-font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  font-family: ${props => props.theme.titleFonts};
+  font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  grid-column: 5 / span 2;
+  grid-row: 1;
+  text-align: center;
+  &:hover {
+    cursor: pointer;
+  }
 `
 
 const NumberRatingBox = styled.div` 
   grid-column: 5 / span 2;
-  grid-row: 1;
-  justify-self: center;
-  align-self: center;
-  font-family: ${props => props.theme.bodyFonts};
-  font-size: ${props => props.theme.fonts.sizes.bodySmall};
+  grid-row: 2;
   text-align: center;
 `
 
 const ErrorText = styled.div`
   color: ${props => props.theme.colors.error};
-  grid-column: 1 / span 3;
-  grid-row: 3;
+  grid-column: 1 / span 2;
+  grid-row: 4;
   text-align: right;
 `
 
-const StyledMusic = styled(faMusic)`
+const FormIcon = styled.span`
+  font-size: 2rem;
+  text-align: center;
+
+  &:hover {
+    cursor: pointer;
+    animation: ${squishAndBounce} .9s;
+  }
+
+`
+
+const ListenedBox = styled.div`
+  grid-column: 1 / span 2;
+  grid-row: 2;
+  text-align: center;
+`
+
+const ListBox = styled.div`
+  grid-column: 3 / span 2;
+  grid-row: 2;
+  text-align: center;
+`
+
+const ListIcon = styled(FormIcon)`
+  color: ${props => props.color};
+  grid-column: 3 / span 2;
+  grid-row: 1;
+`
+
+const MusicIcon = styled(FormIcon)`
+  color: ${props => props.color};
+  grid-column: 1 / span 2;
+  grid-row: 1;
 `
 
 const ReviewForm = ({ textReview, 
@@ -66,6 +126,47 @@ const ReviewForm = ({ textReview,
   const theme = useTheme()
 
   const [visibleOnEdit, setVisibleOnEdit] = useState("")
+  const [musicIconColor, setMusicIconColor] = useState("")
+  const [listIconColor, setListIconColor] = useState("")
+
+  useEffect(() => {
+    if (!listened) {
+      setMusicIconColor(theme.colors.primaryOne)
+    }
+    else {
+      setMusicIconColor(theme.colors.primaryTwo)
+    }
+    if (!listenList) {
+      setListIconColor(theme.colors.primaryOne)
+    }
+    else {
+      setListIconColor(theme.colors.primaryTwo)
+    }
+  }, [listened, listenList])
+
+  const handleListenedChange = () => {
+    setEditMode(true)
+    /*
+    if (listened){
+      setMusicIconColor(theme.colors.primaryOne)
+    } else {
+      setMusicIconColor(theme.colors.primaryTwo)
+    }
+    */
+    setListened(!listened)
+  }
+
+  const handleListenListChange = () => {
+    setEditMode(true)
+    /*
+    if (listenList){
+      setListIconColor(theme.colors.primaryOne)
+    } else {
+      setListIconColor(theme.colors.primaryTwo)
+    }
+    */
+    setListenList(!listenList)
+  }
 
   useEffect(() => {
     if (editMode){
@@ -111,33 +212,38 @@ const ReviewForm = ({ textReview,
     <div>
         <FormControl >
         <ReviewFormDiv>
-          <div>
-            <FontAwesomeIcon icon={faMusic} />
-          </div>
-        <FontAwesomeIcon icon={faList} />
-        <button style={{ gridColumn: "1 / span 2", gridRow: 1 }} onClick={() => setListened(!listened)} > 
-        {listened ? "Listened" : "Listened?"}
-        </button>
-        <button style={{ gridColumn: "3 / span 2", gridRow: 1 }} onClick={() => setListenList(!listenList)}> 
-        {listenList ? "On your listen list" : "Add to listen list?"} 
-        </button>
-        <NumberRatingBox>
+          <MusicIcon color={musicIconColor} onClick={() => handleListenedChange()}>
+            <FontAwesomeIcon  
+              icon={faMusic} />
+          </MusicIcon> <br></br>
+          <ListenedBox>
+            {listened ? "Listened" : "Listened?"}
+          </ListenedBox>
+          <ListIcon color={listIconColor} onClick={() => handleListenListChange()}>
+            <FontAwesomeIcon icon={faList} />
+          </ListIcon> <br></br>
+          <ListBox>
+            {listenList ? "On your listen list" : "Add to listen list?"}
+          </ListBox>
           { editMode
           ? <><TextField
               error={numberRating.error !== ""}
               value={numberRating.value}
-              sx={{ width: "6em" }}
+              sx={{ width: "6em", gridColumn: "5 / span 2", gridRow: "1", justifySelf: "center" }}
               onChange={event => handleNumberRatingChange(event)}
               InputLabelProps={{
               shrink: true,
               }}
             /> <br></br></>
-          : <RatingText> { numberRating.value !== "" ? `${numberRating.value}` : `None` } <br></br> </RatingText>
+          : <RatingText onClick={() => setEditMode(!editMode)}> 
+            { numberRating.value !== "" ? `${numberRating.value}` : `-` } <br></br> 
+          </RatingText>
           }
+        <NumberRatingBox>
           {`Rating`} <br></br> {`(0.0 - 10.0)`}
         </NumberRatingBox>
-        <FormText> Your thoughts: </FormText>
-        <div style={{ gridColumn:"2 / span 5", gridRow:"2" }}>
+        <FormText style={{ gridColumn: "1", gridRow: "3" }} > Your thoughts: </FormText>
+        <div style={{ gridColumn:"2 / span 5", gridRow:"3" }}>
           { editMode 
           ? <TextField
               sx={{ width: "95%" }}
@@ -158,7 +264,13 @@ const ReviewForm = ({ textReview,
           {numberRating.error !== "" ? `${numberRating.error}` : null}
         </ErrorText>
         <Button 
-          sx={{ display: visibleOnEdit, color: "black", gridRow:"3 / span 1", gridColumn:"5 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }} 
+          sx={{ display: visibleOnEdit, color: "black", gridRow:"4 / span 1", gridColumn:"3 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}
+          onClick={() => setEditMode(!editMode)}
+        >
+          Stop editing
+        </Button>
+        <Button 
+          sx={{ display: visibleOnEdit, color: "black", gridRow:"4 / span 1", gridColumn:"5 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }} 
           onClick={() => handleFormSubmit()}> 
             Submit 
         </Button>

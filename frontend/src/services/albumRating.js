@@ -70,6 +70,7 @@ const getAllUserRatings = async ({ userID }) => {
 } 
 
 export default {
+  stringifyRating,
   getRating,
   postRating,
   getAllUserRatings

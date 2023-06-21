@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from "react"
-import { TextField, Modal, FormControl, Box } from "@mui/material"
+import { TextField, Modal, FormControl, Box, Button } from "@mui/material"
 import userService from "../services/user.js"
 import { useAuth0 } from "@auth0/auth0-react"
-import styled from "styled-components"
+import styled, { useTheme } from "styled-components"
 
 const modalStyle = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
+    width: "10rem",
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
-    p: 4,
+    p: 4
   }
 
 const LoginModal = ({ isOpen, setIsOpen, user }) => {
+  const theme = useTheme()
+
   const { getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
 
   const [nickname, setNickname] = useState("")
@@ -53,8 +55,10 @@ const LoginModal = ({ isOpen, setIsOpen, user }) => {
     <Modal
     open={isOpen}
     onClose={() => setIsOpen(false)}
+    sx = {{ fontFamily: theme.bodyFonts }}
     >
       <Box sx={modalStyle}>
+        <div style={{  }} > Edit profile info </div>
         <TextField      
           label="nickname"   
           value = {nickname}
@@ -65,13 +69,11 @@ const LoginModal = ({ isOpen, setIsOpen, user }) => {
           label="picture url"
           value = {pictureUrl}
           onChange = {(event) => setPictureUrl(event.target.value)}
-          variant = "standard"
-          onKeyUp = {(event) => { if(event.key === "Enter"){
-                    submitProfileChanges()
-              }
-            }
-          }>
+          variant = "standard">
         </TextField>
+        <Button 
+          onClick={() => submitProfileChanges()}
+          sx={{ marginTop: ".5rem", float: "right" }}> Submit </Button>
       </Box>
     </Modal>
   )

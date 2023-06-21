@@ -9,8 +9,8 @@ const theme = {
   fonts: {
     sizes: {
       header: "4.0rem",
-      titleMedium: "2.0rem",
-      titleSmall: "1.8rem",
+      titleMedium: "2.5rem",
+      titleSmall: "2.0rem",
       titleTiny: "1.5rem",
       bodyLarge: "1.2rem",
       bodyMedium: "1rem",
@@ -19,7 +19,9 @@ const theme = {
   },
   colors: {
     primaryOne: "#FF0000",
+    secondaryOne: "#ff6b6b",
     primaryTwo: "#0047FF",
+    secondaryTwo: "#789dff",
     primaryThree: "#FFFFFF",
     error: "#8a3630"
   },

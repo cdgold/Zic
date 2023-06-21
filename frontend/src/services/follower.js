@@ -1,6 +1,8 @@
 import auth0Service from "./auth0.js"
 import axios from "axios"
 
+import albumRatingService from "./albumRating.js"
+
 const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/followers`
 
 const follow = async ({ userID, toFollowID, token }) => {
@@ -40,7 +42,17 @@ const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
   }
   const response = await axios.get(getUrl)
   let returnValue
-  (response.status === 200) ? returnValue = response.data : returnValue = null
+  if(response.status === 200){
+    response.data.posts.forEach((element, index, array) => {
+      if (typeof element.rating !== undefined){
+        array[index].rating = albumRatingService.stringifyRating({ "rating": element.rating })
+      }
+    })
+    console.log(response.data)
+    returnValue = response.data
+  } else { 
+    returnValue = null
+  }
   return returnValue
 }
 

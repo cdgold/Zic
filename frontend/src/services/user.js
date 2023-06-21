@@ -14,8 +14,8 @@ const search = async ({ query }) => {
   return userResponse.data
 }
 
-const getUserProfile = async ({ id }) => {
-    const getUrl = `${baseUrl}/${id}`
+const getUserProfile = async ({ userID }) => {
+    const getUrl = `${baseUrl}/${userID}`
     const userResponse = await axios.get(getUrl)
     return userResponse.data
 }
@@ -23,6 +23,7 @@ const getUserProfile = async ({ id }) => {
 const patchUser = async ({ changes, token }) => {
   let config = {}
   config = auth0Service.setHeaderToken({"config": config, "token": token})
+  console.log("changes: ", changes)
   const patchResponse = await axios.patch(baseUrl, changes, config)
   return patchResponse.data
 }

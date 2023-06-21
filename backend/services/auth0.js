@@ -67,14 +67,14 @@ const getUserByID = async (ID) => {
   return returnUser.data
 }
 
-const patchUser = async ({ patchBody, userID }) => {
+const patchUser = async ({ patchBody, userSub }) => {
   await checkTokenValidity()
   const config = {
     "headers": {
       "Authorization": token
     }
   }
-  const patchUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users/auth0|${userID}`
+  const patchUrl = `${process.env.AUTH0_DOMAIN}/api/v2/users/${userSub}`
   const auth0Response = await axios.patch(patchUrl, patchBody, config)
   return auth0Response.data
 }

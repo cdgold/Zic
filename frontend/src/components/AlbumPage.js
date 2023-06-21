@@ -32,21 +32,21 @@ const dummyReview = {
   ]
 }
 
-const ALBUM_PAGE_DIV_COLUMN_1_PX = 420
-const ALBUM_PAGE_DIV_COLUMN_2_PX = 350
+const ALBUM_PAGE_DIV_COLUMN_1_REM = 30
+const ALBUM_PAGE_DIV_COLUMN_2_REM = 30
 
 const PageDiv = styled.div`
   width: 100vw;
-  min-width: ${ALBUM_PAGE_DIV_COLUMN_1_PX + ALBUM_PAGE_DIV_COLUMN_2_PX}px;
+  min-width: ${ALBUM_PAGE_DIV_COLUMN_1_REM + ALBUM_PAGE_DIV_COLUMN_2_REM}rem;
   display: flex;
   justify-content: center;
 `
 
 const AlbumPageDiv = styled.div`
   display: grid;
-  grid-template-columns: ${ALBUM_PAGE_DIV_COLUMN_1_PX}px ${ALBUM_PAGE_DIV_COLUMN_2_PX}px;
-  grid-auto-rows: min-content 400px min-content;
-  row-gap: 15px;
+  grid-template-columns: ${ALBUM_PAGE_DIV_COLUMN_1_REM}rem ${ALBUM_PAGE_DIV_COLUMN_2_REM}rem;
+  grid-auto-rows: min-content min-content min-content;
+  row-gap: 1rem;
   margin: 0 auto;
 `
 
@@ -59,7 +59,7 @@ const HeadlineDiv = styled.div`
 `
 
 const AlbumTitleDiv = styled.div`
-  font-size: 50px;
+  font-size: ${props => props.theme.fonts.sizes.titleMedium};
   color: ${props => props.theme.colors.primaryOne};
   -webkit-text-stroke-width: .25px;
   -webkit-text-stroke-color: black;
@@ -67,19 +67,17 @@ const AlbumTitleDiv = styled.div`
 `
 
 const AlbumTitleSublineDiv = styled.div`
-  font-size: 35px;
+  font-size: ${props => props.theme.fonts.sizes.titleSmall};
   color: ${props => props.theme.colors.primaryOne};
-  -webkit-text-stroke-width: .1px;
-  -webkit-text-stroke-color: black;
 `
 
 const AlbumImg = styled.img`
   grid-column: 1;
   grid-row: 2;
-  height: 400px; 
-  width: 400px; 
+  width: 80%; 
   filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15));
   border-radius: 5%;
+  justify-self: center;
 `
 
 const TracklistDiv = styled.div`
@@ -114,6 +112,18 @@ const TracklistTable = styled.table`
   width: 100%;
   font-style: normal;
   border-spacing: 5px;
+`
+
+const StaticTrackRatingSpan = styled.span`
+
+  &:hover {
+    cursor: pointer;
+  }
+
+`
+
+const ErrorText = styled.span`
+  color: ${props => props.theme.colors.error};
 `
 
 const TrackEntry = ({ track, trackRatings, handleTrackRatingChange, editMode, setEditMode }) => {
@@ -151,7 +161,9 @@ const TrackEntry = ({ track, trackRatings, handleTrackRatingChange, editMode, se
             shrink: true,
           }}
         /> 
-      : <span > { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"} </span>
+      : <StaticTrackRatingSpan onClick={() => setEditMode(!editMode)}> 
+          { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"} 
+        </StaticTrackRatingSpan>
     } 
     </td>
   </tr>
@@ -165,13 +177,13 @@ const AlbumPage = ({ albumID }) => {
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
   const [userRating, setUserRating] = useState(null)
-  const [trackRatings, setTrackRatings] = useState({})
+  const [trackRatings, setTrackRatings] = useState({ error: "" })
   const [textReview, setTextReview] = useState("")
   const [numberRating, setNumberRating] = useState({value: "", error: ""})
   const [listened, setListened] = useState(false)
   const [listenList, setListenList] = useState(false)
+  const [originalRating , setOriginalRating] = useState(null)
 
-  console.log("userRating", userRating)
   console.log("trackRatings is: ", trackRatings)
 
   useEffect(() => {
@@ -195,27 +207,35 @@ const AlbumPage = ({ albumID }) => {
     albumRatingService.getRating({ "userID": user.sub, "albumID": albumID })
       .then(returnedRating => {
         console.log("Returned rating is: ", returnedRating)
-        if (returnedRating.album !== null){
+        if (returnedRating !== null){
           setUserRating(returnedRating.album)
+        } else {
+          setUserRating({})
         }
         if (typeof returnedRating.tracks !== "undefined") {
-          console.log("Returned rating tracks is: ", returnedRating.tracks)
-          const initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
+          let initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
             allTracks[current.song_id] = current.rating 
-            console.log("All tracks is now: ", allTracks)
             return allTracks
           }, {})
+          initialTrackRatings["error"] = ""
+          setTrackRatings(initialTrackRatings)
+        } else {
+          let initialTrackRatings= { "error": "" }
           setTrackRatings(initialTrackRatings)
         }
       })
-      .catch(error => { setUserRating(dummyReview.album); 
+      .catch(error => { 
+        setUserRating({})
+        /*setUserRating(dummyReview.album); 
         
         const initialTrackRatings = dummyReview.tracks.reduce((allTracks, current) => {
           allTracks[current.song_id] = current.rating 
           console.log("All tracks is now: ", allTracks)
           return allTracks
         }, {})
-        setTrackRatings(initialTrackRatings)})
+        initialTrackRatings["error"] = ""
+        */
+        setTrackRatings({ "error": "" })})
     }
   }, [user])
 
@@ -250,27 +270,72 @@ const AlbumPage = ({ albumID }) => {
   }
 
   const handleTrackRatingSubmit = async () => {
-    let token
-    try { 
-        token = await getAccessTokenSilently({
-        authorizationParams: {
-          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
-        },
-      })}
-      catch (error) {
-        token = await getAccessTokenWithPopup({
+    let error = ""
+    Object.keys(trackRatings).forEach(function(trackID, number) {
+      if(isNaN(trackRatings[trackID]) || trackRatings[trackID] > 10.0 || trackRatings[trackID] < 0.0){
+          error = "Song ratings must be between 0.0 and 10.0."
+      }})
+    console.log("Error is: ", error)
+    if (error === ""){
+      let token
+      try { 
+          token = await getAccessTokenSilently({
           authorizationParams: {
             audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
           },
-        })
-      }
-    songRatingService.postMultiple({ "ratings": trackRatings, "token": token, "albumID": albumID })
+        })}
+        catch (error) {
+          token = await getAccessTokenWithPopup({
+            authorizationParams: {
+              audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+            },
+          })
+        }
+      songRatingService.postMultiple({ "ratings": trackRatings, "token": token, "albumID": albumID })
+    }
+    else {
+      const newTrackRatings = { ...trackRatings, "error": error }
+      setTrackRatings(newTrackRatings)
+    }
   }
 
   const handleTrackRatingChange = ({ value, trackID }) => {
     const newTrackRatings = { ...trackRatings, [trackID]: value }
     setTrackRatings(newTrackRatings)
   }
+
+  useEffect(() => {
+    if (editMode === true){
+      const gottenRating = { ...userRating, "tracks": trackRatings }
+      setOriginalRating(gottenRating)
+    } else {
+      if (originalRating !== null){
+        if (typeof originalRating.rating !== "undefined"){
+          const prevRating = {
+            "value": originalRating.rating,
+            "error": ""
+          }
+          setNumberRating(prevRating)
+        }
+        if (typeof originalRating.review_text !== "undefined"){
+          const prevReviewText = `${originalRating.review_text}`
+          setTextReview(prevReviewText)
+        }
+        if (typeof originalRating.listened !== "undefined"){
+          const prevListened = Boolean(originalRating.listened)
+          setListened(prevListened)
+        }
+        if (typeof originalRating.listen_list !== "undefined"){
+          const prevListenList = Boolean(originalRating.listen_list)
+          setListenList(prevListenList)
+        }
+        if (typeof originalRating.tracks !== "undefined"){
+          const prevTrackRatings = { ...originalRating.tracks }
+          setTrackRatings(prevTrackRatings)
+        }
+      }
+    }
+  }, [editMode])
   
   if(album === null){
     return(<div> Loading... </div>)
@@ -322,7 +387,9 @@ const AlbumPage = ({ albumID }) => {
         }
         { editMode ? 
           <tr>
-            <td></td>
+            <td>
+              {(trackRatings.error !== "") ? <ErrorText> {trackRatings.error} </ErrorText> : null}
+            </td>
             <td colSpan="2">
               <Button 
               sx={{ color: "black", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}

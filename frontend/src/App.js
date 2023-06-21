@@ -1,5 +1,5 @@
 import "./App.css"
-import React, { useState, useEffect } from "react"
+import React, { useState } from "react"
 import albumService from "./services/album.js"
 import userService from "./services/user.js"
 import AlbumPage from "./components/AlbumPage.js"
@@ -57,6 +57,9 @@ function App() {
   const profileID = profileMatch ?
     profileMatch.params.userID
     : null 
+
+  console.log("profileID: ", profileID)  
+  
   return (
     <div>
       <Header

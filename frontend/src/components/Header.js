@@ -15,7 +15,7 @@ const HeaderDiv = styled.div`
   left: 0;
   height: 3rem;
   width: 100vw;
-  min-width: 30rem;
+  min-width: 40rem;
   background-color: white;
   overflow:auto;
   z-index: 10;

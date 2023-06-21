@@ -59,7 +59,7 @@ usersRouter.patch("/", auth0Service.validateAccessToken, async (request, respons
     changes["nickname"] = request.body.nickname
   } 
   if (typeof request.body.picture !== "undefined"){
-    picture = picture.replace(/\s/g, '')
+    let picture = request.body.picture.replace(/\s/g, '')
     if(picture.length > 0){
       changes["picture"] = request.body.picture
     }

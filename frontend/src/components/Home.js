@@ -6,6 +6,7 @@ import dummyResults from "../test/dummySpotifyAlbums.js"
 import styled, { useTheme } from "styled-components"
 import { Link } from "react-router-dom"
 
+/*
 const dummyPosts = [{
   "id_being_followed": "647a59e1fc60c55ea86431b0",
   "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
@@ -41,6 +42,7 @@ const dummyUsers = [{
     "email_verified": false,
     "userID": "6480e17568a768f0729a1d0a"
 }]
+*/
 
 const PostColumn = styled.div`
   font-family: ${props => props.theme.bodyFonts};
@@ -53,10 +55,10 @@ const PostColumn = styled.div`
 
 const PostRow = styled.div`
   display: grid;
-  grid-template-columns: minmax(10ch, 10%) minmax(15ch, 20%) minmax(20ch, 60%);
+  grid-template-columns: minmax(4rem, 10%) minmax(4rem, 20%) minmax(10rem, 60%);
   grid-template-rows: fit-content(18ch) 1fr;
   row-gap: 1rem;
-  column-gap: .8rem;
+  column-gap: .5rem;
 `
 
 const FollowingUserAvatar = styled.img`
@@ -69,15 +71,17 @@ const FollowingUserAvatar = styled.img`
 
 const AlbumImageColumn = styled.div`
   grid-column: 2;
- grid-row: 2 / span 1; 
- width: 100%;
- text-align: center;
- font-size: ${props => props.theme.fonts.sizes.bodyMedium};
- font-family: ${props => props.theme.titleFonts};
+  grid-row: 2 / span 1; 
+  width: 100%;
+  text-align: center;
+  font-size: ${props => props.theme.fonts.sizes.bodyMedium};
+  font-family: ${props => props.theme.titleFonts};
 `
 
-const AlbumNumberStyling = styled.div`
-
+const Title = styled.div`
+  font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  color: black;
+  font-family: ${props => props.theme.titleFonts};
 `
 
 
@@ -155,21 +159,24 @@ const Home = ({ following, setFollowing }) => {
   const [followingPosts, setFollowingPosts] = useState(null)
   const [albumInfo, setAlbumInfo] = useState(null)
 
-  console.log("albumInfo: ", dummyResults)
-  console.log("dummy users is: ", dummyUsers)
+  
+  console.log("followingPosts: ", followingPosts)
+  console.log("albumInfo is: ", albumInfo)
+  console.log("Following: ", following)
 
+  /*
   useEffect(() => {
     setAlbumInfo(dummyResults.albums)
     setFollowingPosts(dummyPosts)
     setFollowing(dummyUsers)
   }, [])
+*/
 
-
-  /*
+  
   useEffect(() => {
     if(following === null && typeof user !== "undefined" && typeof user.sub !== "undefined"){
       console.log("First part ")
-      followerService.getFollowingPosts({ "userID": user.sub })
+      followerService.getFollowingPosts({ "userID": user.sub, "numPosts": 15 })
         .then((response) => {
           if (response !== null){
             setFollowingPosts(response.posts)
@@ -228,7 +235,6 @@ const Home = ({ following, setFollowing }) => {
       setAlbumInfo([])
     }
   }, [followingPosts])
-  */
 
   if (typeof user === "undefined" && !(isLoading)){
     return(
@@ -245,15 +251,18 @@ const Home = ({ following, setFollowing }) => {
     )
   }
   return(
-    <div style={{ marginLeft: "1rem", fontFamily: theme.bodyFonts }}>
-      Welcome back, {`${user.nickname}`}!
+    <div style={{ display: "flex", flexDirection: "column", width: "95vw", alignItems: "center", minWidth: "20rem" }}>
+      <div style={{ justifySelf: "center" }}>
+      <Title>
+        Recent posts
+      </Title>
       {(Array.isArray(followingPosts) && followingPosts.length > 0) 
       ? <PostColumn>
-        {`From those you follow:`}
         {followingPosts.map((post) => <FollowingPostRow post={post} allUserInfo={following} allAlbumInfo={albumInfo} />)}
         </PostColumn>
       : <> {`No posts from those you follow.`} </>
       }
+      </div>
     </div>
   )
 }

@@ -11,7 +11,7 @@ import styled from "styled-components"
 import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
 
 const NUMBER_OF_ALBUMS_PER_PAGE = 20
-const MAX_TEXT_LENGTH = 100
+const MAX_TEXT_LENGTH = 120
 
 // can sort by ratingDescending, mostRecent
 
@@ -20,6 +20,7 @@ const PageDiv = styled.div`
   min-width: 20rem;
   margin-left: max(1rem, 2.5vw);
   margin-right: max(1rem, 2.5vw);
+  font-family: ${props => props.theme.bodyFonts}
 `
 
 const AlbumRows = styled.div`
@@ -27,13 +28,19 @@ const AlbumRows = styled.div`
   flex-direction: row;
   flex-wrap: wrap;
   gap: 1rem;
-  justify-content: flex-start;
+  justify-content: space-evenly;
   margin-top: 2rem;
 `
 
 const AlbumRowItem = styled.div`
   width: 22%;
   min-width: 10rem;
+`
+
+const Title = styled.div`
+  font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  color: black;
+  font-family: ${props => props.theme.titleFonts};
 `
 
 const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUserID }) => {
@@ -46,6 +53,7 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     const [ spotifyCode, setSpotifyCode ] = useState(null)
     const [ spotifyTokenReady, setSpotifyTokenReady ] = useState(false)
 
+    /*
     useEffect(() => {setAlbumReviews([
       {
           "rating": "9.9",
@@ -109,58 +117,8 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     ])}, [])
     
     useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
-  
-    let location = useLocation()
-    console.log("sorted albums is IS: ", sortedAlbums)
-    console.log("sortBy is: ", sortBy)
-
-    useEffect(() => {
-      if (typeof location.search !== "undefined"){
-        const urlSearchParams = new URLSearchParams(location.search)
-        let code = urlSearchParams.get('code');
-        if (code !== null){
-          setSpotifyCode(code)
-        }
-      }
-    }, [location])
-
-    useEffect(() => {
-      if (spotifyCode !== null){
-      spotifyService.getAndSetTokenWithCode({ "code": spotifyCode })
-        .then(token => { 
-            console.log("got token, it's: ", token)
-            setSpotifyCode(null) 
-            setSpotifyTokenReady(true)
-        })
-      }
-    }, [spotifyCode])
-
-    /*
-    useEffect(() => {
-      if(typeof personalAlbumReviews !== undefined && personalAlbumReviews.length === 0){
-        if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
-            albumRatingService.getAllUserRatings({ "userID": user.sub })
-              .then((reviews) => {
-                setAlbumReviews(reviews)
-                setPersonalAlbumReviews(reviews)
-              })
-              .catch((error) => { setAlbumReviews([]) })
-        } /*else if (otherUserID !== null){
-            albumRatingService.getAllUserRatings({ "userID": otherUserID })
-              .then((reviews) => {
-                setAlbumReviews(reviews)
-              })
-            .catch((error) => { setAlbumReviews([]) })
-          }
-          */ /*
-        } else { // personal album ratings have already been fetched by other page
-          console.log("Didn't refetch")
-          const newPersonalAlbumReviews = [...personalAlbumReviews]
-          setAlbumReviews(newPersonalAlbumReviews)
-        }
-    }, [user])
-    
-
+  */
+/*
     useEffect(() => {setAlbumReviews([
       {
           "rating": 9,
@@ -190,6 +148,57 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     "post_time": "2023-06-15T19:07:48.893Z"
        }
   ])}, [])
+  */
+
+    let location = useLocation()
+    console.log("sorted albums is IS: ", sortedAlbums)
+    console.log("sortBy is: ", sortBy)
+
+    useEffect(() => {
+      if (typeof location.search !== "undefined"){
+        const urlSearchParams = new URLSearchParams(location.search)
+        let code = urlSearchParams.get('code');
+        if (code !== null){
+          setSpotifyCode(code)
+        }
+      }
+    }, [location])
+
+    useEffect(() => {
+      if (spotifyCode !== null){
+      spotifyService.getAndSetTokenWithCode({ "code": spotifyCode })
+        .then(token => { 
+            console.log("got token, it's: ", token)
+            setSpotifyCode(null) 
+            setSpotifyTokenReady(true)
+        })
+      }
+    }, [spotifyCode])
+
+    
+    useEffect(() => {
+      if(typeof personalAlbumReviews !== undefined && personalAlbumReviews.length === 0){
+        if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
+            albumRatingService.getAllUserRatings({ "userID": user.sub })
+              .then((reviews) => {
+                setAlbumReviews(reviews)
+                setPersonalAlbumReviews(reviews)
+              })
+              .catch((error) => { setAlbumReviews([]) })
+        } /*else if (otherUserID !== null){
+            albumRatingService.getAllUserRatings({ "userID": otherUserID })
+              .then((reviews) => {
+                setAlbumReviews(reviews)
+              })
+            .catch((error) => { setAlbumReviews([]) })
+          }
+          */ 
+        } else { // personal album ratings have already been fetched by other page
+          console.log("Didn't refetch")
+          const newPersonalAlbumReviews = [...personalAlbumReviews]
+          setAlbumReviews(newPersonalAlbumReviews)
+        }
+    }, [user])
 
       useEffect(() => {
       if(typeof sortedAlbums !== "undefined" && sortedAlbums.length !== 0){
@@ -207,7 +216,6 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
         }  
       }
     }, [sortedAlbums])
-  */
   
     useEffect(() => {
       console.log("entered")
@@ -246,7 +254,7 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     }
     if (!isAuthenticated && (otherUserID === null || typeof otherUserID === "undefined")) {
       return (
-      <div>
+      <div>em
         Need to login to see your album reviews.
       </div>
       )
@@ -257,7 +265,9 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
             <button onClick={() => spotifyService.getMostPlayed()}> Get your most listened artists! </button>
             : <button onClick={() => spotifyService.getUserAuthorization()}> Authorize spotify! </button>
           */}
-          {otherUserID === null ? user.nickname : "other user nickname here"} album ratings
+          <Title>
+          {otherUserID === null ? user.nickname : "other user nickname here"}'s album ratings
+          </Title>
           {(sortedAlbums.length > 0) && (albumInfo.length > 0) ?
           <div>
             sort by: 
@@ -265,6 +275,7 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
               value={sortBy}
               onChange={event => setSortBy(event.target.value)}
               inputProps={{ 'aria-label': 'Sort by' }}
+              sx={{ color: "black" }}
               size="small"
             >
             <MenuItem value={"ratingDescending"}> {`Rating (high to low)`}</MenuItem>

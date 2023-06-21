@@ -18,12 +18,19 @@ import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
 const NUMBER_OF_ALBUMS_SHOWN = 4
 const MAX_REVIEW_TEXT_CHARACTERS  = 50
 
+const PageDiv = styled.div`
+  margin-left: 1.5rem;
+`
+
 const AlbumRow = styled.div`
   width: 100vw;
-  min-width: 40rem;
+  min-width: 12rem;
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
 `
+
+
 
 const AlbumRowItem = styled.div`
   min-width: 10rem;
@@ -34,6 +41,10 @@ const Header = styled.div`
   font-family: ${props => props.theme.titleFonts};
   font-size: ${props => props.fontSize};
 `
+
+const ButtonStyling = {
+  
+}
 
 const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, setPersonalAlbumReviews, following, setFollowing }) => {
   // on first log in, make user set a UNIQUE(?) nickname
@@ -47,12 +58,13 @@ const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, s
   const [ albumInfo, setAlbumInfo ] = useState([])
   const [ modalIsOpen, setModalIsOpen ] = useState(false)
 
-console.log("albumReviews: ", albumReviews)
-console.log("albumInfo: ", albumInfo)
+console.log("following: ", following)
+console.log("otherUser: ", otherUser)
 console.log("otherUserID: ", otherUserID)
 //console.log("MRAlbums: ", mostRecentAlbums)
 //console.log("albumInfo: ", albumInfo)
 //console.log("dummys", dummySpotifyAlbums)
+/*
 useEffect(() => {setAlbumReviews([
   {
       "rating": "9.9",
@@ -84,8 +96,8 @@ useEffect(() => {setAlbumReviews([
 ])}, [])
 
 useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
+*/
 
-/*
 
 useEffect(() => {     // fetches album ratings
   if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length === 0){
@@ -109,7 +121,7 @@ useEffect(() => {     // fetches album ratings
       const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
       setAlbumReviews(newPersonalAlbumReviews)
     }
-}, [user, otherUser])
+}, [user, otherUserID])
   
   useEffect(() => {
     if(following === null && user !== undefined && user.sub !== undefined){
@@ -126,7 +138,7 @@ useEffect(() => {     // fetches album ratings
   useEffect(() => {     // fetches otherUser if not already there
     if (otherUserID !== null) { 
       if ((otherUser === null) || (typeof otherUser !== "undefined" && typeof otherUser.id !== "undefined" && otherUserID !== otherUser.id)){
-        otherUser = userService.getUserProfile({ userID: otherUser.id })
+        otherUser = userService.getUserProfile({ "userID": otherUserID })
           .then((response) => {
             setOtherUser(response)
           })
@@ -147,7 +159,7 @@ useEffect(() => {     // fetches album ratings
         .catch((error) => {setAlbumInfo(null)})
     }
   }, [mostRecentAlbums])
-*/
+
 
 const MoreReviewsButton = () => {
   const theme = useTheme()
@@ -197,7 +209,7 @@ useEffect(() => { // sorts album ratings by time posted, truncates
       try{
         await followerService.follow({ "userID": user.sub, "toFollowID": otherUser["userID"], "token": token })
         const newFollowing = [ ...following, {
-          "user_id": otherUser["userID"],
+          "userID": otherUser["userID"],
           "nickname": otherUser["nickname"],
           "picture": otherUser["picture"]
         } ]
@@ -252,19 +264,27 @@ useEffect(() => { // sorts album ratings by time posted, truncates
     )
   }
   return(
-    <div>
+    <PageDiv>
       <div style={{ display: "flex", columnGap: "1rem" }}>
         <img 
           src={otherUserID === null ? user.picture : otherUser.picture}
-          style={{ borderRadius: "50%" }}
+          style={{ borderRadius: "50%", width: "10rem" }}
           alt={"Profile picture"}
         />
         <Header fontSize={`${theme.fonts.sizes.header}`}> {otherUserID === null ? user.nickname : otherUser.nickname} </Header >
+        {otherUserID === null ? <Button 
+          sx = {{
+            color: "black",
+            fontFamily: theme.titleFonts,
+            alignSelf: "center",
+            borderColor: "black"
+          }}
+          variant= "outlined"
+          onClick={(() => {setModalIsOpen(true)})} > edit profile </Button> : null}
       </div>
-      {otherUserID === null ? < button onClick={(() => {setModalIsOpen(true)})} > edit profile </button> : null}
       <ProfileModal user={user} isOpen={modalIsOpen} setIsOpen={(setModalIsOpen)} ></ProfileModal>
       { (otherUserID !== null && isAuthenticated) ? 
-        <> {(Array.isArray(following) && typeof (following.find(user => user.id === otherUserID)) === "undefined") ? 
+        <> {(Array.isArray(following) && typeof (following.find(user => user.userID === otherUserID)) === "undefined") ? 
               <button onClick={() => handleFollow()}> Follow </button> 
               : <button onClick={() => handleUnfollow()}> Unfollow </button>} 
         </>
@@ -292,7 +312,7 @@ useEffect(() => { // sorts album ratings by time posted, truncates
           <MoreReviewsButton />
         </AlbumRow>
         : <div> No reviews. </div>}
-    </div>
+    </PageDiv>
   )
 }
 
