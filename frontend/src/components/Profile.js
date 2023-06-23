@@ -30,8 +30,6 @@ const AlbumRow = styled.div`
   gap: 1rem;
 `
 
-
-
 const AlbumRowItem = styled.div`
   min-width: 10rem;
   width: 20vw;

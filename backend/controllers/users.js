@@ -29,6 +29,13 @@ usersRouter.get("/:auth0ID", async (request, response) => {
 })
 
 usersRouter.get("/search/:query", async (request, response) => {
+  console.log(`
+  user: ${process.env.DATABASE_LOGIN},
+  database: ${process.env.DATABASE_NAME},
+  password: ${process.env.DATABASE_PASSWORD},
+  port: 5432,
+  host: ${process.env.DATABASE_URL},
+  `)
   const query = request.params.query
   const auth0Response = await auth0Service.searchUsersByNickname(query)
   const trimmedResponses = auth0Service.trimUserResponses({ "userArray": auth0Response })

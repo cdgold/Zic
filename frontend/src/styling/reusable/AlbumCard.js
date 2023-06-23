@@ -16,6 +16,7 @@ const AlbumCardStyled = styled.div`
 
 const AlbumText = styled.div`
   text-align: center;
+  overflow-wrap: break-word;
 `
 
 const AlbumImg = styled.img`

@@ -34,6 +34,7 @@ const getFollowing = async ({ userID }) => {
 const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
   userID = auth0Service.dropStartOfSub(userID)
   let getUrl = `${baseUrl}/following/posts/${userID}`
+  console.log("requesting: ", getUrl)
   if (numPosts){
     getUrl = `${getUrl}?numPosts=${numPosts}`
   }
@@ -53,6 +54,7 @@ const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
   } else { 
     returnValue = null
   }
+  console.log("got back: ", response)
   return returnValue
 }
 

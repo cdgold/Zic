@@ -19,5 +19,8 @@
     "express-oauth2-jwt-bearer": "^1.5.0",
     "jsonwebtoken": "^9.0.0",
     "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "@flydotio/dockerfile": "^0.2.15"
   }
 }

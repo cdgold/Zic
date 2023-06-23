@@ -9,6 +9,7 @@ const theme = {
   fonts: {
     sizes: {
       header: "4.0rem",
+      titleLarge: "3.0rem",
       titleMedium: "2.5rem",
       titleSmall: "2.0rem",
       titleTiny: "1.5rem",
@@ -23,6 +24,7 @@ const theme = {
     primaryTwo: "#0047FF",
     secondaryTwo: "#789dff",
     primaryThree: "#FFFFFF",
+    secondaryThree: "#dbdbdb",
     error: "#8a3630"
   },
   titleFonts: `"Archivo Black", "Archivo", sans-serif`,

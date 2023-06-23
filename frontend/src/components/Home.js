@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react"
 import { useAuth0 } from '@auth0/auth0-react'
 import followerService from "../services/follower.js"
 import albumService from "../services/album.js"
+import AcceptButton from "../styling/reusable/AcceptButton.js"
 import dummyResults from "../test/dummySpotifyAlbums.js"
 import styled, { useTheme } from "styled-components"
 import { Link } from "react-router-dom"
+import SignupPage from "../pages/Signup.js"
 
 /*
 const dummyPosts = [{
@@ -44,6 +46,13 @@ const dummyUsers = [{
 }]
 */
 
+const Page = styled.div`
+  display: grid; 
+  width: 95vw; 
+  height: 95vh;
+  align-items: center;
+`
+
 const PostColumn = styled.div`
   font-family: ${props => props.theme.bodyFonts};
   min-width: 20rem;
@@ -79,9 +88,13 @@ const AlbumImageColumn = styled.div`
 `
 
 const Title = styled.div`
-  font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  font-size: ${props => props.theme.fonts.sizes.titleLarge};
   color: black;
   font-family: ${props => props.theme.titleFonts};
+  text-align: center;
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
 `
 
 
@@ -151,7 +164,8 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
 const Home = ({ following, setFollowing }) => {
   const {
     isLoading,
-    user
+    user,
+    loginWithRedirect
   } = useAuth0();
 
   const theme = useTheme() 
@@ -175,7 +189,6 @@ const Home = ({ following, setFollowing }) => {
   
   useEffect(() => {
     if(following === null && typeof user !== "undefined" && typeof user.sub !== "undefined"){
-      console.log("First part ")
       followerService.getFollowingPosts({ "userID": user.sub, "numPosts": 15 })
         .then((response) => {
           if (response !== null){
@@ -238,20 +251,20 @@ const Home = ({ following, setFollowing }) => {
 
   if (typeof user === "undefined" && !(isLoading)){
     return(
-      <div>
-        Sign in or sign up.
-      </div>
+      <Page>
+        <SignupPage />
+      </Page>
     )
   }
   if (isLoading || followingPosts === null || albumInfo === null) {
     return(
-      <div>
+      <Page>
         Loading...
-      </div>
+      </Page>
     )
   }
   return(
-    <div style={{ display: "flex", flexDirection: "column", width: "95vw", alignItems: "center", minWidth: "20rem" }}>
+    <Page>
       <div style={{ justifySelf: "center" }}>
       <Title>
         Recent posts
@@ -263,7 +276,7 @@ const Home = ({ following, setFollowing }) => {
       : <> {`No posts from those you follow.`} </>
       }
       </div>
-    </div>
+    </Page>
   )
 }
 
