@@ -95,7 +95,7 @@ const ErrorText = styled.span`
 `
 
 
-const AlbumPage = ({ albumID, viewWidth }) => {
+const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange }) => {
 
   const { isAuthenticated, user, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [editMode, setEditMode] = useState(false)
@@ -108,7 +108,8 @@ const AlbumPage = ({ albumID, viewWidth }) => {
   const [listened, setListened] = useState(false)
   const [listenList, setListenList] = useState(false)
   const [originalRating , setOriginalRating] = useState(null)
-
+  const [isPosting, setIsPosting] = useState(false)
+ 
   console.log("trackRatings is: ", trackRatings)
 
   useEffect(() => {
@@ -120,14 +121,13 @@ const AlbumPage = ({ albumID, viewWidth }) => {
           setAlbumYear(returnedAlbum.release_date.slice(0, 4))
         }
       })
-      .catch(error => 
-        //navigate("/error/")
-        setAlbum(dummyAlbum)
-      )
+      .catch(error => {
+        handleErrorChange({ notification: "Could not fetch album information." })
+        setAlbum([])
+      })
   }, [])
 
   useEffect(() => {
-    
     if(isAuthenticated && typeof user !== "undefined" && typeof user.sub !== "undefined"){
     albumRatingService.getRating({ "userID": user.sub, "albumID": albumID })
       .then(returnedRating => {
@@ -137,7 +137,7 @@ const AlbumPage = ({ albumID, viewWidth }) => {
         } else {
           setUserRating({})
         }
-        if (typeof returnedRating.tracks !== "undefined") {
+        if (returnedRating !== null && typeof returnedRating.tracks !== "undefined") {
           let initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
             allTracks[current.song_id] = current.rating 
             return allTracks
@@ -150,6 +150,7 @@ const AlbumPage = ({ albumID, viewWidth }) => {
         }
       })
       .catch(error => { 
+        handleErrorChange({ notification: "Could not fetch review data." })
         setUserRating({})
         /*setUserRating(dummyReview.album); 
         
@@ -165,6 +166,7 @@ const AlbumPage = ({ albumID, viewWidth }) => {
   }, [user])
 
   const handleFormSubmit = async () => {
+    setIsPosting(true)
     const newRating = {
       "userID": user.sub, 
       "albumID": albumID,
@@ -190,8 +192,17 @@ const AlbumPage = ({ albumID, viewWidth }) => {
         })
       }
       console.log("Token is: ", token)
-    await albumRatingService.postRating({ "rating": newRating, "token": token, "albumID": albumID })
-    setUserRating(newRating)
+    try {
+      await albumRatingService.postRating({ "rating": newRating, "token": token, "albumID": albumID })
+      setUserRating(newRating)
+      setEditMode(false)
+      handleSuccessChange({ "notification": "Success! Review saved." })
+      setIsPosting(false)
+    }
+    catch (error) {
+      handleErrorChange({ "notification": "Error while posting album review." })
+      setIsPosting(false)
+    }
   }
 
   const handleTrackRatingSubmit = async () => {
@@ -288,6 +299,7 @@ const AlbumPage = ({ albumID, viewWidth }) => {
             handleFormSubmit={handleFormSubmit}
             editMode={editMode}
             setEditMode={setEditMode}
+            isPosting={isPosting}
           />
             <Tracklist 
               editMode={editMode} 

@@ -8,6 +8,7 @@ import Home from "./components/Home.js"
 import Profile from "./components/Profile.js"
 import Header from "./components/Header.js"
 import SearchResults from "./components/SearchResults.js"
+import {SuccessNotification, ErrorNotification} from "./styling/reusable/Notification.js"
 import {
   Routes, Route, useMatch, useNavigate
 } from "react-router-dom"
@@ -32,7 +33,20 @@ function App() {
   const [personalAlbumReviews, setPersonalAlbumReviews] = useState([])
   const [following, setFollowing] = useState(null)  // array of users being followed
   const [viewWidth, setViewWidth] = useState(window.innerWidth)
+  const [successNotification, setSuccessNotification] = useState("")
+  const [errorNotification, setErrorNotification] = useState("")
   //const [album, setAlbum] = useState(dummyAlbum)
+
+  const handleSuccessChange = ({ notification, timeInSec = 5 }) => {
+    setSuccessNotification(`${notification}`)
+    setTimeout(() => setSuccessNotification(""), timeInSec * 1000)
+  }
+
+  const handleErrorChange = ({ notification, timeInSec = 5 }) => {
+    console.log("handling error with notification: ", notification, "and time in sec:", timeInSec)
+    setErrorNotification(`${notification}`)
+    setTimeout(() => setErrorNotification(""), timeInSec * 1000)
+  }
 
   useEffect(() => {
     window.addEventListener("resize", () => setViewWidth(window.innerWidth))
@@ -75,6 +89,8 @@ function App() {
         viewWidth={viewWidth}
       >
       </Header>
+      <SuccessNotification notification={successNotification} />
+      <ErrorNotification notification={errorNotification} />
       <RoutesDiv>
         <Routes>
           <Route path="/" element={
@@ -110,6 +126,8 @@ function App() {
           <Route path="/album/:id" element={<AlbumPage 
             albumID={albumID} 
             viewWidth={viewWidth}
+            handleSuccessChange={handleSuccessChange}
+            handleErrorChange={handleErrorChange}
           />} />
           <Route path="/albumRatings/" element={
             <AlbumRatings 

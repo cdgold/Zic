@@ -1,8 +1,9 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import auth0Service from "../services/auth0.js"
 import { Link, useNavigate } from "react-router-dom"
 import styled, { useTheme } from "styled-components"
 import dummyResults from "../test/dummySearchResults.js"
+import AcceptButton from "../styling/reusable/AcceptButton.js"
 
 const Page = styled.div`
   width: 100%;
@@ -22,8 +23,12 @@ const HrStyled = styled.hr`
 const ResultRow = styled.div`
   font-family: ${props => props.theme.bodyFonts};
   color: black;
-  font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  font-size: ${props => props.theme.fonts.sizes.bodyLarge};
+  align-content: center;
   display: grid;
+  grid-template-columns: min-content auto;
+  grid-template-rows: 1fr;
+  column-gap: 1rem;
 `
 
 const UserLink = styled.a`
@@ -33,15 +38,22 @@ const UserLink = styled.a`
 `
 
 const TrackResult = ({ track }) => {
+  const theme = useTheme()
+
   return(
+    <>
+    <HrStyled />
     <ResultRow>
-      <HrStyled />
       { track.images[0].url ? 
-        <img style={{ height: "80px", width:"80px" }} src={track.images[0].url} /> 
+        <img style={{ height: "80px", width:"80px", gridColumn: 1, gridRow: 1 }} src={track.images[0].url} /> 
         : null
       }
-      {track.name} by {track.artists[0].name} ({track.release_date.slice(0, 4)}) <br></br>
+      <div style={{ gridColumn: 2, gridRow: 1 }}>
+      <span style={{ color: theme.colors.primaryOne }}> {track.name} </span> by <br></br>
+      <span style={{ color: theme.colors.secondaryOne }}> {track.artists[0].name} </span> ({track.release_date.slice(0, 4)})
+      </div>
     </ResultRow>
+    </>
   )
 }
 
@@ -65,6 +77,19 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
 
   const navigate = useNavigate()
 
+  const [albumShown, setAlbumShown] = useState("")
+  const [userShown, setUserShown] = useState("none")
+
+  const handleTabChange = (searchTab) => {
+    if(searchTab === "album"){
+      setAlbumShown("")
+      setUserShown("none")
+    } else if (searchTab === "user"){
+      setAlbumShown("none")
+      setUserShown("")
+    }
+  }
+
   const handleUserClick = ({ event, user }) => {
     event.preventDefault()
     setOtherUser(user)
@@ -80,35 +105,41 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
   }
   return(
     <Page>
+      <AcceptButton onclick={() => handleTabChange("album")} text={"Albums"} />
+      <AcceptButton onclick={() => handleTabChange("user")} text={"Users"} />
+        <div style={{ display: albumShown }}>
         Album search for: {searchQuery}
-        {typeof searchResponse.albums !== "undefined" ? 
-          searchResponse.albums.map(result => {
-          const albumID = result.uri.split(":")[2]
-          return(
-          <Link 
-            style={{ textDecoration: "none", textColor: "red" }} 
-            key={result.uri} 
-            to={`/album/${albumID}`}
-          >
-            <TrackResult track={result} />
-          </Link>
-          )})
-        : <div> No albums to show. </div>}
-        User search for: {searchQuery}
-        {typeof searchResponse.users !== "undefined" && searchResponse.users.length > 0 ?
-        searchResponse.users.map(result => {
-          console.log(result)
-          const userID = result.userID
-          return(
-          <UserLink
-            onClick={(event) => handleUserClick({ "event": event, "user": result  })}
-            key={userID} 
-            to={`/profile/${userID}`}
-          >
-            <UserResult user={result} />
-          </UserLink>
-          )})
-        : <div> No users found. </div> }
+          {typeof searchResponse.albums !== "undefined" ? 
+            searchResponse.albums.map(result => {
+            const albumID = result.uri.split(":")[2]
+            return(
+            <Link 
+              style={{ textDecoration: "none", textColor: "red" }} 
+              key={result.uri} 
+              to={`/album/${albumID}`}
+            >
+              <TrackResult track={result} />
+            </Link>
+            )})
+          : <div> No albums to show. </div>}
+        </div>
+        <div style={{ display: userShown }}>
+          User search for: {searchQuery}
+          {typeof searchResponse.users !== "undefined" && searchResponse.users.length > 0 ?
+          searchResponse.users.map(result => {
+            console.log(result)
+            const userID = result.userID
+            return(
+            <UserLink
+              onClick={(event) => handleUserClick({ "event": event, "user": result  })}
+              key={userID} 
+              to={`/profile/${userID}`}
+            >
+              <UserResult user={result} />
+            </UserLink>
+            )})
+          : <div> No users found. </div> }
+        </div>
     </Page>
   )
 }

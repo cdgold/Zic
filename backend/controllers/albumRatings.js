@@ -40,16 +40,11 @@ albumRatingsRouter.get("/:userID/:albumID", async (request, response) => {
 // trackRatings is an array of tracks, made up of [id, rating]
 
 albumRatingsRouter.post("/", validateAccessToken, async (request, response, next) => {
-  let userID = request.auth.payload.sub
+  let userID = auth.payload.sub
   userID = dropStartOfSub(userID)
   const albumID = request.body.albumID
   const review = request.body.review
 
-  if (typeof request.body.userID === "undefined"){
-    return response.status(400).json({
-      error: "need userID to rate album"
-    })
-  }
   if (typeof request.body.albumID === "undefined"){
     return response.status(400).json({
       error: "need albumID to rate album"
@@ -78,11 +73,25 @@ albumRatingsRouter.post("/", validateAccessToken, async (request, response, next
       newReview["listened"] = true
       : newReview["listened"] = false
     const requestValues = [userID, albumID, newReview["rating"], newReview["reviewText"], newReview["listenList"], newReview["listened"], new Date()]
-    console.log("request values is: ", requestValues)
-    await dbpool.query(`INSERT INTO "album_ratings" (auth0_id, album_id, rating, review_text,
-        listen_list, listened, post_time) VALUES ($1, $2, $3, $4, $5, $6, $7)`, requestValues)
+    const queryResponse = await dbpool.query(`SELECT (auth0_id, album_id) FROM "album_ratings" 
+      WHERE auth0_id = $1 AND album_id = $2`, [userID, albumID])
+    if (queryResponse.rowCount > 0){
+      await dbpool.query(`UPDATE "album_ratings" 
+      SET 
+        rating = $3,
+        review_text = $4,
+        listen_list = $5, 
+        listened = $6, 
+        post_time = $7
+      WHERE auth0_id = $1 AND album_id = $2`, requestValues)
+    } else {
+      await dbpool.query(`INSERT INTO "album_ratings" (auth0_id, album_id, rating, review_text,
+          listen_list, listened, post_time) VALUES ($1, $2, $3, $4, $5, $6, $7)`, requestValues)
+    }
     const insertedAlbumResponse = await dbpool.query(`SELECT (auth0_id, album_id, rating, review_text,
-      listen_list, listened, post_time) FROM "album_ratings"`)
+      listen_list, listened, post_time) 
+        FROM "album_ratings"
+        WHERE auth0_id = $1 AND album_id = $2`, [userID, albumID])
     const insertedRows = {"album": insertedAlbumResponse.rows[0]}
     let trackRatingResponses = []
     if (typeof request.body.trackRatings !== "undefined"){

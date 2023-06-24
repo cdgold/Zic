@@ -3,6 +3,7 @@ import { TextField, Modal, FormControl, Box, Button } from "@mui/material"
 import userService from "../services/user.js"
 import { useAuth0 } from "@auth0/auth0-react"
 import styled, { useTheme } from "styled-components"
+import AcceptButton from "../styling/reusable/AcceptButton.js"
 
 const modalStyle = {
     position: 'absolute',
@@ -48,6 +49,9 @@ const LoginModal = ({ isOpen, setIsOpen, user }) => {
         })
       }
       userService.patchUser({ "changes": changes, "token": token})
+        .then(
+          window.location.reload()
+        )
     }
   }
 
@@ -71,9 +75,12 @@ const LoginModal = ({ isOpen, setIsOpen, user }) => {
           onChange = {(event) => setPictureUrl(event.target.value)}
           variant = "standard">
         </TextField>
-        <Button 
-          onClick={() => submitProfileChanges()}
-          sx={{ marginTop: ".5rem", float: "right" }}> Submit </Button>
+        <span style={{ marginTop: ".5rem", float: "right" }}>
+        <AcceptButton
+          onclick={() => submitProfileChanges()}
+          text={"Submit"}
+        /> 
+        </span>
       </Box>
     </Modal>
   )

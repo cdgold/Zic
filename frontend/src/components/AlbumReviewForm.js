@@ -4,6 +4,8 @@ import { FormControl, TextField, Button } from "@mui/material"
 import styled, { useTheme, keyframes } from "styled-components"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faMusic, faList } from "@fortawesome/free-solid-svg-icons"
+import AcceptButton from "../styling/reusable/AcceptButton.js"
+import DeclineButton from "../styling/reusable/DeclineButton.js"
 
 const MAX_REVIEW_LENGTH = 1000
 
@@ -36,6 +38,7 @@ const ReviewFormDiv = styled.div`
   align-items: center;
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: min-content, min-content, min-content, min-content;
+  row-gap: .5rem;
   width: 100%;
   font-family: ${props => props.theme.bodyFonts};
   font-size: ${props => props.theme.fonts.sizes.bodyMedium};
@@ -121,7 +124,8 @@ const ReviewForm = ({ textReview,
   userRating,
   handleFormSubmit,
   editMode,
-  setEditMode }) => {
+  setEditMode,
+  isPosting }) => {
   
   const theme = useTheme()
 
@@ -263,17 +267,19 @@ const ReviewForm = ({ textReview,
         <ErrorText>
           {numberRating.error !== "" ? `${numberRating.error}` : null}
         </ErrorText>
-        <Button 
-          sx={{ display: visibleOnEdit, color: "black", gridRow:"4 / span 1", gridColumn:"3 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}
-          onClick={() => setEditMode(!editMode)}
-        >
-          Stop editing
-        </Button>
-        <Button 
-          sx={{ display: visibleOnEdit, color: "black", gridRow:"4 / span 1", gridColumn:"5 / span 2", fontFamily: `"Archivo Black", "Archivo", sans-serif` }} 
-          onClick={() => handleFormSubmit()}> 
-            Submit 
-        </Button>
+        <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"3 / span 2", justifySelf: "end" }}>
+        <DeclineButton 
+          onclick={() => setEditMode(!editMode)}
+          text={"Stop editing"}
+        />
+        </span>
+        <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"5 / span 2", justifySelf: "end" }}>
+        <AcceptButton 
+          onclick={() => handleFormSubmit()}
+          text={"Submit"}
+          disabled={isPosting}
+          /> 
+        </span>
         </ReviewFormDiv>
         </FormControl>
     </div>

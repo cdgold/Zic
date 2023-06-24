@@ -20,8 +20,7 @@ const AlbumText = styled.div`
 `
 
 const AlbumImg = styled.img`
-  width: 60%;
-  min-width: 10rem;
+  width: 80%;
 `
 
 // softMax determines if review_text can be expanded or not
@@ -80,8 +79,8 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
   if(album !== null && album !== undefined && album.id !== undefined){
   return(
       <AlbumCardStyled>
-        <Link to={`/album/${album.id}`} style={{ textDecoration: "none", color: "inherit" }}>
-          <div style={{ display: "flex", justifyContent: "center" }} >
+        <Link to={`/album/${album.id}`} style={{ textDecoration: "none", color: "inherit", width: "100%" }}>
+          <div style={{ display: "flex", justifyContent: "center", width: "100%" }} >
             <AlbumImg src={album.images[0].url} />
           </div>
         </Link>

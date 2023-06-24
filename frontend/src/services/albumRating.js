@@ -39,6 +39,7 @@ const getRating = async ({ userID, albumID }) => {
     })
   }
     else { // status is not 200
+      console.log("response is not 200")
       return null
     }
   const albumAndTracks = {"album": albumReview, "tracks": trackReviews}
@@ -66,7 +67,14 @@ const getAllUserRatings = async ({ userID }) => {
   //auth0Service.setHeaderToken({ config, accessToken })
   const urlToGet = `${baseUrl}/user/${newUserID}`
   const userRatingsResponse = await axios.get(urlToGet, config)
-  return userRatingsResponse.data
+  let albumReviews = userRatingsResponse.data.map((review) => {
+    if (typeof review.rating !== "undefined" && !(isNaN(review.rating))){
+      review.rating = stringifyRating({ "rating": review.rating })
+    }
+    return(review)
+  })
+  console.log("track reviews is:", albumReviews)
+  return albumReviews
 } 
 
 export default {

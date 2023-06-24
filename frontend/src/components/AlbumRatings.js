@@ -17,7 +17,6 @@ const MAX_TEXT_LENGTH = 120
 
 const PageDiv = styled.div`
   width: 95vw;
-  min-width: 20rem;
   margin-left: max(1rem, 2.5vw);
   margin-right: max(1rem, 2.5vw);
   font-family: ${props => props.theme.bodyFonts}
@@ -34,7 +33,7 @@ const AlbumRows = styled.div`
 
 const AlbumRowItem = styled.div`
   width: 22%;
-  min-width: 10rem;
+  min-width: 8rem;
 `
 
 const Title = styled.div`
@@ -52,103 +51,6 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     const [ sortBy, setSortBy ] = useState("ratingDescending")
     const [ spotifyCode, setSpotifyCode ] = useState(null)
     const [ spotifyTokenReady, setSpotifyTokenReady ] = useState(false)
-
-    /*
-    useEffect(() => {setAlbumReviews([
-      {
-          "rating": "9.9",
-          "review_text": `First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"
-          First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"`,
-          "listen_list": false,
-          "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
-          "auth0_id": "647a59e1fc60c55ea86431b0",
-          "listened": true,
-          "post_time": "2023-06-13T20:10:58.467Z"
-      },
-      {
-          "rating": "5.0",
-          "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
-          "listen_list": false,
-          "album_id": "5zi7WsKlIiUXv09tbGLKsE",
-          "auth0_id": "647a59e1fc60c55ea86431b0",
-          "listened": true,
-          "post_time": "2023-06-13T22:19:30.291Z"
-      },
-      {
-        "rating": "1.0",
-        "review_text": "Could not be easier to listen to",
-        "listen_list": false,
-        "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
-        "auth0_id": "647a59e1fc60c55ea86431b0",
-        "listened": true,
-        "post_time": "2023-06-15T19:07:48.893Z"
-           },       {
-            "rating": "9.9",
-            "review_text": "First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"",
-            "listen_list": false,
-            "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
-            "auth0_id": "647a59e1fc60c55ea86431b0",
-            "listened": true,
-            "post_time": "2023-06-13T20:10:58.467Z"
-        },
-        {
-            "rating": "5.0",
-            "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
-            "listen_list": false,
-            "album_id": "5zi7WsKlIiUXv09tbGLKsE",
-            "auth0_id": "647a59e1fc60c55ea86431b0",
-            "listened": true,
-            "post_time": "2023-06-13T22:19:30.291Z"
-        },
-        {
-          "rating": "1.0",
-          "review_text": "Could not be easier to listen to",
-          "listen_list": false,
-          "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
-          "auth0_id": "647a59e1fc60c55ea86431b0",
-          "listened": true,
-          "post_time": "2023-06-15T19:07:48.893Z"
-             }
-    ])}, [])
-    
-    useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
-  */
-/*
-    useEffect(() => {setAlbumReviews([
-      {
-          "rating": 9,
-          "review_text": "First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"",
-          "listen_list": false,
-          "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
-          "auth0_id": "647a59e1fc60c55ea86431b0",
-          "listened": true,
-          "post_time": "2023-06-13T20:10:58.467Z"
-      },
-      {
-          "rating": 90,
-          "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
-          "listen_list": false,
-          "album_id": "5zi7WsKlIiUXv09tbGLKsE",
-          "auth0_id": "647a59e1fc60c55ea86431b0",
-          "listened": true,
-          "post_time": "2023-06-13T22:19:30.291Z"
-      },
-      {
-    "rating": 90,
-    "review_text": "Could not be easier to listen to",
-    "listen_list": false,
-    "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
-    "auth0_id": "647a59e1fc60c55ea86431b0",
-    "listened": true,
-    "post_time": "2023-06-15T19:07:48.893Z"
-       }
-  ])}, [])
-  */
 
     let location = useLocation()
     console.log("sorted albums is IS: ", sortedAlbums)

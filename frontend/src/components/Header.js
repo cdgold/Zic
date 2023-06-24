@@ -164,7 +164,7 @@ const SlidingMenu = ({ user, isAuthenticated, handleLogin, handleLogout, menuSty
       <MenuLink onClick={() => handleNavigate("/profile/")}>
         {user.nickname}'s Profile
       </MenuLink>
-      <MenuLink>
+      <MenuLink onClick={handleLogout}>
         Logout
       </MenuLink>
     </>
