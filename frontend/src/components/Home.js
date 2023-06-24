@@ -48,9 +48,11 @@ const dummyUsers = [{
 
 const Page = styled.div`
   display: grid; 
-  width: 95vw; 
-  height: 95vh;
+  width: 98vw; 
+  min-width: 320px;
+  height: 90vh;
   align-items: center;
+  justify-items: center;
 `
 
 const PostColumn = styled.div`
@@ -161,7 +163,7 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
   return(null)
 }
 
-const Home = ({ following, setFollowing }) => {
+const Home = ({ following, setFollowing, viewWidth }) => {
   const {
     isLoading,
     user,
@@ -173,11 +175,13 @@ const Home = ({ following, setFollowing }) => {
   const [followingPosts, setFollowingPosts] = useState(null)
   const [albumInfo, setAlbumInfo] = useState(null)
 
+
+  /*
   
   console.log("followingPosts: ", followingPosts)
   console.log("albumInfo is: ", albumInfo)
   console.log("Following: ", following)
-
+*/
   /*
   useEffect(() => {
     setAlbumInfo(dummyResults.albums)
@@ -252,7 +256,9 @@ const Home = ({ following, setFollowing }) => {
   if (typeof user === "undefined" && !(isLoading)){
     return(
       <Page>
-        <SignupPage />
+        <SignupPage
+          viewWidth={viewWidth}
+        />
       </Page>
     )
   }

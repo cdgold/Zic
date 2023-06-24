@@ -34,7 +34,7 @@ const squishAndBounce = keyframes`
 const ReviewFormDiv = styled.div`
   display: grid;
   align-items: center;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(6, 1fr);
   grid-template-rows: min-content, min-content, min-content, min-content;
   width: 100%;
   font-family: ${props => props.theme.bodyFonts};
@@ -209,8 +209,8 @@ const ReviewForm = ({ textReview,
   }, [userRating])
 
   return(
-    <div>
-        <FormControl >
+    <div style={{ width: "100%" }}>
+        <FormControl sx={{ width: "100%" }}>
         <ReviewFormDiv>
           <MusicIcon color={musicIconColor} onClick={() => handleListenedChange()}>
             <FontAwesomeIcon  
@@ -242,8 +242,8 @@ const ReviewForm = ({ textReview,
         <NumberRatingBox>
           {`Rating`} <br></br> {`(0.0 - 10.0)`}
         </NumberRatingBox>
-        <FormText style={{ gridColumn: "1", gridRow: "3" }} > Your thoughts: </FormText>
-        <div style={{ gridColumn:"2 / span 5", gridRow:"3" }}>
+        <FormText style={{ gridColumn: "1 / span 2", gridRow: "3" }} > Your thoughts: </FormText>
+        <div style={{ gridColumn:"3 / span 4", gridRow:"3" }}>
           { editMode 
           ? <TextField
               sx={{ width: "95%" }}
@@ -257,7 +257,7 @@ const ReviewForm = ({ textReview,
               multiline
               rows={5}
           />
-          : <div onClick={() => setEditMode(true)}> { textReview !== "" ? textReview : `None` } </div>
+          : <div onClick={() => setEditMode(true)}> { textReview !== "" ? textReview : `None. (Click to edit!)` } </div>
           }
         </div>
         <ErrorText>

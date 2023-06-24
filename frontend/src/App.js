@@ -1,5 +1,5 @@
 import "./App.css"
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import albumService from "./services/album.js"
 import userService from "./services/user.js"
 import AlbumPage from "./components/AlbumPage.js"
@@ -20,6 +20,7 @@ import { useAuth0 } from "@auth0/auth0-react"
 const RoutesDiv = styled.div`
   position: absolute;
   top: ${props => props.theme.headerMargin};
+  width: 100vw;
 `
 
 function App() {
@@ -30,7 +31,12 @@ function App() {
   const [otherUser, setOtherUser] = useState(null)  // used for viewing profiles found from search
   const [personalAlbumReviews, setPersonalAlbumReviews] = useState([])
   const [following, setFollowing] = useState(null)  // array of users being followed
+  const [viewWidth, setViewWidth] = useState(window.innerWidth)
   //const [album, setAlbum] = useState(dummyAlbum)
+
+  useEffect(() => {
+    window.addEventListener("resize", () => setViewWidth(window.innerWidth))
+  }, [])
 
   const musicSearchRequest = async () => {
     let albumResponse, userResponse
@@ -66,11 +72,17 @@ function App() {
         setMusicSearchText={setMusicSearchText}
         musicSearchRequest={musicSearchRequest}
         musicSearchText={musicSearchText}
+        viewWidth={viewWidth}
       >
       </Header>
       <RoutesDiv>
         <Routes>
-          <Route path="/" element={<Home following={following} setFollowing={setFollowing} />} />
+          <Route path="/" element={
+          <Home 
+            following={following} 
+            setFollowing={setFollowing} 
+            viewWidth={viewWidth}
+          />} />
           <Route path="/profile/:userID" element={
             <Profile 
               otherUser={otherUser} 
@@ -80,6 +92,7 @@ function App() {
               setFollowing={setFollowing}
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
+              viewWidth={viewWidth}
               />} />
           <Route path="/profile/" element={
             <Profile 
@@ -89,11 +102,15 @@ function App() {
               setFollowing = {setFollowing}
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
+              viewWidth={viewWidth}
               />} />
           <Route path="/search/:query" element={
             <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={setOtherUser} />
           }/>
-          <Route path="/album/:id" element={<AlbumPage albumID={albumID} />} />
+          <Route path="/album/:id" element={<AlbumPage 
+            albumID={albumID} 
+            viewWidth={viewWidth}
+          />} />
           <Route path="/albumRatings/" element={
             <AlbumRatings 
               otherUser={null} 

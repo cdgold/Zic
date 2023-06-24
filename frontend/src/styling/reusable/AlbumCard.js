@@ -77,7 +77,7 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
     }
   })
 
-  if(album !== null){
+  if(album !== null && album !== undefined && album.id !== undefined){
   return(
       <AlbumCardStyled>
         <Link to={`/album/${album.id}`} style={{ textDecoration: "none", color: "inherit" }}>

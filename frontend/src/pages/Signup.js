@@ -6,16 +6,26 @@ import darkSideOfTheMoonCover from "../assets/images/darksideofthemoon.png"
 import titanicRisingCover from "../assets/images/titanicrising.jpg"
 import flowerBoyCover from "../assets/images/flowerboy.png"
 
+const MOBILE_VIEW_THRESHOLD = 750
+
 const SignupPage = styled.div`
-display: grid;
-width: 100%;
-height: 100%;
-minWidth: 20rem;
-margin-top: 1rem;
-grid-template-columns: 1fr 130px 130px 200px;
-grid-template-rows: auto;
+    align-self: center;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    margin-top: 1rem;
+    justify-content: center;
+    grid-template-columns: minmax(min-content, max-content) 130px 130px 165px;
+    grid-template-rows: auto;
 `
 
+const MobileSignupPage = styled.div`
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: minmax(100px, 30%) minmax(100px, 30%) minmax(120px, 40%);
+    grid-template-rows: 1fr 1fr;
+`
 
 const Title = styled.div`
   font-size: ${props => props.theme.fonts.sizes.titleLarge};
@@ -46,6 +56,7 @@ justify-self: center;
 grid-template-columns: 1fr;
 grid-template-rows: auto;
 row-gap: .5rem;
+margin-right: 2rem;
 `
 
 const AlbumImg = styled.img`
@@ -76,34 +87,77 @@ const ButtonSpan = styled.span`
   margin-right: 1rem;
 `
 
-const Signup = () => {
+const Signup = ({ viewWidth }) => {
   
+  const { loginWithRedirect } = useAuth0()
 
+  if (viewWidth > MOBILE_VIEW_THRESHOLD){ 
+    return(
+        <SignupPage>
+            <SignupTextContainer>
+                <Title>
+                    RATE YOUR MUSIC.
+                </Title>
+                <Subtitle>
+                    Zic lets you track your favorite albums and share them with others.
+                </Subtitle>
+                <ButtonSpan>
+                    <AcceptButton 
+                    text={"Sign up"}
+                    onclick={(() => loginWithRedirect({
+                    authorizationParams:{
+                        screen_hint: "signup"
+                    }
+                    }))}>
+                    Sign up
+                    </AcceptButton>
+                </ButtonSpan>
+            </SignupTextContainer>
+            <AlbumImg1 src={flowerBoyCover} alt={"Flower Boy by Tyler, The Creator's album cover"}></AlbumImg1>
+            <AlbumImg2 src={titanicRisingCover} alt={"Titanic Rising by Weyes Blood's album cover"}></AlbumImg2>
+            <AlbumImg3 src={darkSideOfTheMoonCover} alt={"The Dark Side of the Moon by Pink Floyd's album cover"}></AlbumImg3>
+        </SignupPage>
+  )
+  }
   return(
-    <SignupPage>
-        <SignupTextContainer>
-            <Title>
-                RATE YOUR MUSIC.
-            </Title>
-            <Subtitle>
-                Zic lets you track your favorite albums and share them with others.
-            </Subtitle>
-            <ButtonSpan>
-                <AcceptButton 
-                text={"Sign up"}
-                onclick={(() => loginWithRedirect({
-                authorizationParams:{
-                    screen_hint: "signup"
-                }
-                }))}>
-                Sign up
-                </AcceptButton>
-            </ButtonSpan>
-        </SignupTextContainer>
-        <AlbumImg1 src={flowerBoyCover} alt={"Flower Boy by Tyler, The Creator's album cover"}></AlbumImg1>
-        <AlbumImg2 src={titanicRisingCover} alt={"Titanic Rising by Weyes Blood's album cover"}></AlbumImg2>
-        <AlbumImg3 src={darkSideOfTheMoonCover} alt={"The Dark Side of the Moon by Pink Floyd's album cover"}></AlbumImg3>
-    </SignupPage>
-)} 
+    <MobileSignupPage>
+        <span style={{ gridRow: 1, gridColumn: "1 / span 3", alignSelf: "center", marginRight: "0" }}>
+            <SignupTextContainer>
+                <Title>
+                    RATE YOUR MUSIC.
+                </Title>
+                <Subtitle>
+                    Zic lets you track your favorite albums and share them with others.
+                </Subtitle>
+                <ButtonSpan>
+                    <AcceptButton 
+                    text={"Sign up"}
+                    onclick={(() => loginWithRedirect({
+                    authorizationParams:{
+                        screen_hint: "signup"
+                    }
+                    }))}>
+                    Sign up
+                    </AcceptButton>
+                </ButtonSpan>
+            </SignupTextContainer>
+        </span>
+        {/*
+        <span style={{ gridRow: 2, gridColumn: 1 }}>
+            <AlbumImg1 
+            src={flowerBoyCover} 
+            alt={"Flower Boy by Tyler, The Creator's album cover"}>
+            </AlbumImg1>
+        </span>
+        <span style={{ gridRow: 2, gridColumn: 2 }}>
+            <AlbumImg2 src={titanicRisingCover} alt={"Titanic Rising by Weyes Blood's album cover"}></AlbumImg2>
+        </span>
+        <span style={{ gridRow: 2, gridColumn: 3 }}>
+            <AlbumImg3 src={darkSideOfTheMoonCover} alt={"The Dark Side of the Moon by Pink Floyd's album cover"}></AlbumImg3>
+        </span>
+        */}
+    </MobileSignupPage>
+  )
+} 
 
 export default Signup

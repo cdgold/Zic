@@ -1,8 +1,14 @@
 import React, { useState } from "react"
 import auth0Service from "../services/auth0.js"
 import { Link, useNavigate } from "react-router-dom"
-import styled from "styled-components"
+import styled, { useTheme } from "styled-components"
 import dummyResults from "../test/dummySearchResults.js"
+
+const Page = styled.div`
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-left: 1.0rem;
+`
 
 const HrStyled = styled.hr`
   margin-left: 10px;
@@ -14,9 +20,10 @@ const HrStyled = styled.hr`
 `
 
 const ResultRow = styled.div`
-  font: "Archivo";
+  font-family: ${props => props.theme.bodyFonts};
   color: black;
   font-size: ${props => props.theme.fonts.sizes.titleSmall};
+  display: grid;
 `
 
 const UserLink = styled.a`
@@ -72,7 +79,7 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
     )
   }
   return(
-    <div>
+    <Page>
         Album search for: {searchQuery}
         {typeof searchResponse.albums !== "undefined" ? 
           searchResponse.albums.map(result => {
@@ -102,7 +109,7 @@ const SearchResults = ({ searchResponse, searchQuery, setOtherUser }) => {
           </UserLink>
           )})
         : <div> No users found. </div> }
-    </div>
+    </Page>
   )
 }
 

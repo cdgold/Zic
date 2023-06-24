@@ -17,9 +17,12 @@ import dummySpotifyAlbums from "../test/dummySpotifyAlbums.js"
 
 const NUMBER_OF_ALBUMS_SHOWN = 4
 const MAX_REVIEW_TEXT_CHARACTERS  = 50
+const SHRINK_TEXT_THRESHOLD = 650
 
 const PageDiv = styled.div`
+  margin-top: 1.5rem;
   margin-left: 1.5rem;
+  margin-right: 1.5rem;
 `
 
 const AlbumRow = styled.div`
@@ -40,12 +43,42 @@ const Header = styled.div`
   font-size: ${props => props.fontSize};
 `
 
+const NameHeader = styled(Header)`
+display: grid;
+grid-template-columns: minmax(35px, 150px) auto;
+grid-template-rows: min-content min-content;
+word-break: break-word;
+column-gap: 1rem;
+`
+
 const ButtonStyling = {
   
 }
 
-const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, setPersonalAlbumReviews, following, setFollowing }) => {
+
+const MoreReviewsButton = () => {
+  const theme = useTheme()
+
+  return(
+    <Link style={{ alignSelf: "center" }} to="/albumRatings/">
+      <Button sx={{ color: "black", fontFamily: theme.titleFonts }}>
+        more reviews 
+      </Button>
+    </Link>
+  )
+}
+
+const Profile = ({ otherUser, 
+  setOtherUser, 
+  otherUserID, 
+  personalAlbumReviews, 
+  setPersonalAlbumReviews, 
+  following, 
+  setFollowing,
+  viewWidth
+ }) => {
   // on first log in, make user set a UNIQUE(?) nickname
+
 
   const theme = useTheme()
 
@@ -55,71 +88,49 @@ const Profile = ({ otherUser, setOtherUser, otherUserID, personalAlbumReviews, s
   const [ favoriteAlbums, setFavoriteAlbums ] = useState([])
   const [ albumInfo, setAlbumInfo ] = useState([])
   const [ modalIsOpen, setModalIsOpen ] = useState(false)
+  const [ headerSize, setHeaderSize ] = useState(`${theme.fonts.sizes.titleLarge}`)
 
-console.log("following: ", following)
-console.log("otherUser: ", otherUser)
-console.log("otherUserID: ", otherUserID)
-//console.log("MRAlbums: ", mostRecentAlbums)
-//console.log("albumInfo: ", albumInfo)
-//console.log("dummys", dummySpotifyAlbums)
-/*
-useEffect(() => {setAlbumReviews([
-  {
-      "rating": "9.9",
-      "review_text": "First Tyler album where he said \"man what if i didn't scream with my friends about my daddy issues for an hour\"",
-      "listen_list": false,
-      "album_id": "2nkto6YNI4rUYTLqEwWJ3o",
-      "auth0_id": "647a59e1fc60c55ea86431b0",
-      "listened": true,
-      "post_time": "2023-06-13T20:10:58.467Z"
-  },
-  {
-      "rating": "5.0",
-      "review_text": "Favorite concept album. Takes you through a breakup while having each song be a distinct feeling of that breakup.",
-      "listen_list": false,
-      "album_id": "5zi7WsKlIiUXv09tbGLKsE",
-      "auth0_id": "647a59e1fc60c55ea86431b0",
-      "listened": true,
-      "post_time": "2023-06-13T22:19:30.291Z"
-  },
-  {
-    "rating": "1.0",
-    "review_text": "Could not be easier to listen to",
-    "listen_list": false,
-    "album_id": "2XgBQwGRxr4P7cHLDYiqrO",
-    "auth0_id": "647a59e1fc60c55ea86431b0",
-    "listened": true,
-    "post_time": "2023-06-15T19:07:48.893Z"
-       }
-])}, [])
 
-useEffect(() => {setAlbumInfo(dummySpotifyAlbums.albums)}, [])
-*/
 
+  console.log("personalAlbumReviews is: ", personalAlbumReviews)
+  console.log("otherUserID is: ", otherUserID)
+
+useEffect(() => {
+  if(viewWidth < SHRINK_TEXT_THRESHOLD){
+    setHeaderSize(`2.2rem`)
+  }
+  if(viewWidth > SHRINK_TEXT_THRESHOLD){
+    setHeaderSize(`${theme.fonts.sizes.titleLarge}`)
+  }
+}, [viewWidth])
+
+console.log("header size is: ", headerSize)
+console.log("view width is: ", viewWidth)
 
 useEffect(() => {     // fetches album ratings
-  if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length === 0){
-      if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
+  if (otherUserID !== null){
+    console.log("fetching allUserRatings for: ", otherUserID)
+    albumRatingService.getAllUserRatings({ "userID": otherUserID })
+      .then((reviews) => {
+        setAlbumReviews(reviews)
+      })
+    .catch((error) => { setAlbumReviews([]) })
+  }
+  else if(otherUserID === null && isAuthenticated && typeof user.sub !== undefined){
+      if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length > 0){
+        console.log("Didn't refetch")
+        const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
+        setAlbumReviews(newPersonalAlbumReviews)
+       }
+      else { // personal album ratings have not been fetched and stored yet
         albumRatingService.getAllUserRatings({ "userID": user.sub })
-          .then((reviews) => {
-            setAlbumReviews(reviews)
-            setPersonalAlbumReviews(reviews)
-          })
-          .catch((error) => { setAlbumReviews([]) })
-      } else if (otherUserID !== null){
-          console.log("fetching allUserRatings for: ", otherUserID)
-          albumRatingService.getAllUserRatings({ "userID": otherUserID })
-            .then((reviews) => {
-              setAlbumReviews(reviews)
-            })
-          .catch((error) => { setAlbumReviews([]) })
-      }
-    } else { // personal album ratings have already been fetched
-      console.log("Didn't refetch")
-      const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
-      setAlbumReviews(newPersonalAlbumReviews)
+        .then((reviews) => {
+          setAlbumReviews(reviews)
+          setPersonalAlbumReviews(reviews)
+        })
+        .catch((error) => { setAlbumReviews([]) })
     }
-}, [user, otherUserID])
+  }}, [user, otherUserID])
   
   useEffect(() => {
     if(following === null && user !== undefined && user.sub !== undefined){
@@ -143,7 +154,7 @@ useEffect(() => {     // fetches album ratings
       }
     }
   }, [otherUserID])
-
+ 
   useEffect(() => { // gets spotify info of album ratings
     if(typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length !== 0){
       const albumsToGet = mostRecentAlbums.reduce((allAlbumInfo, currentReview) => {
@@ -157,19 +168,6 @@ useEffect(() => {     // fetches album ratings
         .catch((error) => {setAlbumInfo(null)})
     }
   }, [mostRecentAlbums])
-
-
-const MoreReviewsButton = () => {
-  const theme = useTheme()
-
-  return(
-    <Link style={{ alignSelf: "center" }} to="/albumRatings/">
-      <Button sx={{ color: "black", fontFamily: theme.titleFonts }}>
-        more reviews 
-      </Button>
-    </Link>
-  )
-}
 
 useEffect(() => { // sorts album ratings by time posted, truncates
   if(typeof albumReviews !== "undefined" && albumReviews.length !== 0){
@@ -264,21 +262,30 @@ useEffect(() => { // sorts album ratings by time posted, truncates
   return(
     <PageDiv>
       <div style={{ display: "flex", columnGap: "1rem" }}>
-        <img 
-          src={otherUserID === null ? user.picture : otherUser.picture}
-          style={{ borderRadius: "50%", width: "10rem" }}
-          alt={"Profile picture"}
-        />
-        <Header fontSize={`${theme.fonts.sizes.header}`}> {otherUserID === null ? user.nickname : otherUser.nickname} </Header >
-        {otherUserID === null ? <Button 
-          sx = {{
-            color: "black",
-            fontFamily: theme.titleFonts,
-            alignSelf: "center",
-            borderColor: "black"
-          }}
-          variant= "outlined"
-          onClick={(() => {setModalIsOpen(true)})} > edit profile </Button> : null}
+        <NameHeader fontSize={headerSize}> 
+          <img 
+            src={otherUserID === null ? user.picture : otherUser.picture}
+            style={{ borderRadius: "50%", gridColumn: 1, gridRow: "1 / span 2", width: "100%" }}
+            alt={"Profile picture"}
+          />
+          <div style={{ gridRow: 1, gridColumn: 2 }}>
+            {otherUserID === null ? user.nickname : otherUser.nickname} 
+          </div>
+          <div style={{ gridRow: 2, gridColumn: 2 }}>
+          {otherUserID === null ? 
+          <Button 
+            sx = {{
+              color: "black",
+              fontFamily: theme.titleFonts,
+              alignSelf: "center",
+              borderColor: "black"
+            }}
+            variant= "outlined"
+            onClick={(() => {setModalIsOpen(true)})} > edit profile 
+          </Button> 
+          : null}
+          </div>
+        </NameHeader >
       </div>
       <ProfileModal user={user} isOpen={modalIsOpen} setIsOpen={(setModalIsOpen)} ></ProfileModal>
       { (otherUserID !== null && isAuthenticated) ? 
@@ -297,7 +304,7 @@ useEffect(() => { // sorts album ratings by time posted, truncates
             </AlbumRowItem>)})}
             <MoreReviewsButton />
           </AlbumRow>
-        : <div> No reviews. </div>}
+        : <div> {`No reviews. ${otherUserID === null ? "You " : "They "} should add more using the search bar above!`} </div>}
       <Header fontSize={`${theme.fonts.sizes.titleTiny}`} > {otherUserID === null ? "Your" : "Their" } most recent reviews </Header>
       {((typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length > 0) && (typeof albumInfo !== "undefined" && albumInfo.length > 0)) ? 
         <AlbumRow> 
@@ -309,7 +316,7 @@ useEffect(() => { // sorts album ratings by time posted, truncates
         })}
           <MoreReviewsButton />
         </AlbumRow>
-        : <div> No reviews. </div>}
+        : <div> {`No reviews. ${otherUserID === null ? "You " : "They "} should add more using the search bar above!`} </div>}
     </PageDiv>
   )
 }

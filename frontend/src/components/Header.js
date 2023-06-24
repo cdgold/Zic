@@ -7,8 +7,20 @@ import styled from "styled-components"
 import magnifyingGlass from "../assets/images/magnifying_glass_transparent_bg.png"
 import { useAuth0 } from "@auth0/auth0-react"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars } from "@fortawesome/free-solid-svg-icons"
+import { faBars, faRectangleXmark } from "@fortawesome/free-solid-svg-icons"
 
+const MOBILE_VIEW_THRESHOLD = 600
+const SHOW_LOGO_THRESHOLD = 380
+
+const openMenuStyles = {
+  transform: "translate3d(20vw, 0, 0)",
+  boxShadow: "0 0 0 max(100vh, 100vw) rgba(0, 0, 0, .3)"
+}
+
+const closedMenuStyles = {
+  transform: "translate3d(100vw, 0, 0)",
+  boxShadow: "none" 
+}
 
 const HeaderDiv = styled.div`
   position: fixed;
@@ -66,7 +78,7 @@ const MovingMenu = styled.div`
   transform: translate3d(100vw, 0, 0);
   width: 80vw;
   height: 100vh;
-  background-color: ${props => props.theme.colors.secondaryThree};
+  background-color: ${props => props.theme.colors.primaryThree};
 
   padding-top: 1rem;
   display: flex;
@@ -74,6 +86,7 @@ const MovingMenu = styled.div`
   justify-items: center;
   text-align: center;
   gap: 1.5rem;
+  transition: transform .8s cubic-bezier(.15,.5,.3,1), box-shadow .8s cubic-bezier(.15,.5,.3,1);
 
   font-family: ${props => props.theme.titleFonts};
 `
@@ -83,6 +96,10 @@ const MenuLink = styled.div`
   text-decoration-color: ${props => props.theme.colors.primaryOne};
   color: black;
   font-size: ${props => props.theme.fonts.sizes.bodyLarge};
+
+  &:hover{
+    cursor: pointer;
+  }
 `
 
 const LogoLetter1 = styled.span`
@@ -104,36 +121,49 @@ const topRightButtonStyle = {
 }
 
 const NavButton = styled.div`
-  color: ${props => props.theme.colors.secondaryTwo};
+  color: ${props => props.theme.colors.primaryTwo};
   margin-left: 1.5rem;
+  margin-right: 1.0rem;
   font-size: 20px;
+
+  &:hover{
+    cursor: pointer;
+    color: ${props => props.theme.colors.secondaryTwo};
+  }
 `
 
 const CloseButton = styled.div`
   text-align: right;
   padding-right: 1.5rem;
-  color: black;
+  color: ${props => props.theme.colors.primaryOne};
+  
+  &:hover{
+    cursor: pointer;
+  }
 `
 
 // for mobile view
-const SlidingMenu = ({ user, isAuthenticated, handleLogin, handleLogout, menuVisible, setMenuVisible }) => {
+const SlidingMenu = ({ user, isAuthenticated, handleLogin, handleLogout, menuStyling, setMenuStyling, navigate }) => {
+  
+  
+  const handleNavigate = (link) => {
+    setMenuStyling(closedMenuStyles)
+    navigate(link)
+  }
+
   return(
-  <MovingMenu style={{ display: "none" }}>
-    <CloseButton onClick={() => setMenuVisible("translate3d(100vw, 0, 0)")}> 
-      X
+  <MovingMenu style={menuStyling}>
+    <CloseButton onClick={() => setMenuStyling(closedMenuStyles)}> 
+      <FontAwesomeIcon icon={faRectangleXmark} />
     </CloseButton>
-    <Link to="/" style={{ textDecoration: "none" }}>
-      <MenuLink>
-        Home Page
-      </MenuLink>
-    </Link>
+    <MenuLink onClick={() => handleNavigate("/")}>
+      Home Page
+    </MenuLink>
     { (isAuthenticated && typeof user.nickname !== "undefined") ?
     <>
-      <Link to="/profile" style={{ textDecoration: "none" }}>
-        <MenuLink>
-          {user.nickname}'s Profile
-        </MenuLink>
-      </Link>
+      <MenuLink onClick={() => handleNavigate("/profile/")}>
+        {user.nickname}'s Profile
+      </MenuLink>
       <MenuLink>
         Logout
       </MenuLink>
@@ -146,7 +176,7 @@ const SlidingMenu = ({ user, isAuthenticated, handleLogin, handleLogout, menuVis
   )
 } 
 
-const SearchBar = ({ theme, musicSearchRequest,setMusicSearchText }) => {
+const SearchBar = ({ theme, musicSearchRequest, setMusicSearchText, viewWidth }) => {
 
   return(
     <>
@@ -165,22 +195,19 @@ const SearchBar = ({ theme, musicSearchRequest,setMusicSearchText }) => {
   )
 }
 
-const Header = ({ musicSearchRequest, setMusicSearchText }) => {
+const Header = ({ musicSearchRequest, setMusicSearchText, viewWidth }) => {
   const theme = useTheme()
 
   const navigate = useNavigate()
-  const [loginModalOpen, setLoginModalOpen] = useState(false) 
-  const [ menuVisible, setMenuVisible ] = useState("translate3d(100vw, 0, 0)")
+  const [ menuStyling, setMenuStyling ] = useState(closedMenuStyles)
   const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
-  console.log("menu visibile is: ", menuVisible)
+  //console.log("menu visibile is: ", menuVisible)
+  console.log("viewWidth is: ", viewWidth)
 
   const handleLogin = async () => {
     await loginWithRedirect()
   }
-
-  let mql = window.matchMedia("(max-width: 600px)")
-  let mobileView = mql.matches;
 
   const handleLogout = async () => {
     logout({ 
@@ -192,16 +219,19 @@ const Header = ({ musicSearchRequest, setMusicSearchText }) => {
 
   return(
     <HeaderDiv style={ {fontFamily: "Archivo"} }>
-      <Link to="/" style={{ display: "flex" }}>
-        <LogoText>
-          <LogoLetter1>Z</LogoLetter1>
-          <LogoLetter2>I</LogoLetter2>
-          <LogoLetter3>C</LogoLetter3>
-        </LogoText>
-      </Link>
-      { (mobileView) ?
+      { (viewWidth > SHOW_LOGO_THRESHOLD) ?
+        <Link to="/" style={{ display: "flex" }}>
+          <LogoText>
+            <LogoLetter1>Z</LogoLetter1>
+            <LogoLetter2>I</LogoLetter2>
+            <LogoLetter3>C</LogoLetter3>
+          </LogoText>
+        </Link> 
+        : null
+      }
+      { (viewWidth < MOBILE_VIEW_THRESHOLD) ?
         <TopRightBar>
-        <NavButton onClick={ () => setMenuVisible("translate3d(-80vw, 0, 0)") }>
+        <NavButton onClick={ () => setMenuStyling(openMenuStyles) }>
           <FontAwesomeIcon icon={faBars} />
         </NavButton>
         <SearchBar 
@@ -210,12 +240,14 @@ const Header = ({ musicSearchRequest, setMusicSearchText }) => {
           theme={theme}
         />
         <SlidingMenu 
-          menuVisible={menuVisible} 
-          setMenuVisible={setMenuVisible}
+          menuStyling={menuStyling} 
+          setMenuStyling={setMenuStyling}
           user={user}
           isAuthenticated={isAuthenticated}
           handleLogin={handleLogin}
-          handleLogout={handleLogout}/>
+          handleLogout={handleLogout}
+          navigate={navigate}
+        />
         </TopRightBar>
       :
       <TopRightBar>

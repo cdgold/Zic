@@ -13,6 +13,15 @@ const Button = styled.button`
   font-size: ${props => props.theme.fonts.sizes.bodyLarge};
   width: fit-content;
   padding: 5px 15px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: ${props => props.theme.colors.secondaryOne}; 
+  }
+
+  &:active {
+    background-color: ${props=>props.theme.colors.tertiaryOne};
+  }
 `
 
 // softMax determines if review_text can be expanded or not

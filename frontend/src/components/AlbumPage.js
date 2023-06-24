@@ -8,7 +8,10 @@ import auth0Service from "../services/auth0.js"
 import { useNavigate } from "react-router-dom"
 import dummyAlbum from "../test/dummyData.js"
 import ReviewForm from "./AlbumReviewForm.js"
+import Tracklist from "./Tracklist.js"
 import { useAuth0 } from "@auth0/auth0-react"
+
+const MOBILE_VIEW_THRESHOLD = 650;
 
 const dummyReview = {
   "album": {
@@ -36,18 +39,25 @@ const ALBUM_PAGE_DIV_COLUMN_1_REM = 30
 const ALBUM_PAGE_DIV_COLUMN_2_REM = 30
 
 const PageDiv = styled.div`
-  width: 100vw;
-  min-width: ${ALBUM_PAGE_DIV_COLUMN_1_REM + ALBUM_PAGE_DIV_COLUMN_2_REM}rem;
+  margin-top: 1.5rem;
+  margin-left: .5rem;
+  width: 95vw;
   display: flex;
   justify-content: center;
 `
 
 const AlbumPageDiv = styled.div`
   display: grid;
-  grid-template-columns: ${ALBUM_PAGE_DIV_COLUMN_1_REM}rem ${ALBUM_PAGE_DIV_COLUMN_2_REM}rem;
-  grid-auto-rows: min-content min-content min-content;
+  grid-template-columns: 45% 45%;
+  grid-template-rows: min-content min-content 1fr;
+  justify-content: center;
   row-gap: 1rem;
+  column-gap: 1.5rem;
   margin: 0 auto;
+`
+
+const MobilePageDiv = styled(AlbumPageDiv)`
+  grid-template-columns: 100%;
 `
 
 const HeadlineDiv = styled.div`
@@ -72,105 +82,20 @@ const AlbumTitleSublineDiv = styled.div`
 `
 
 const AlbumImg = styled.img`
-  grid-column: 1;
-  grid-row: 2;
-  width: 80%; 
+  grid-column: 1fr;
+  grid-row: auto auto auto auto;
+  width: 60%; 
   filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.15));
   border-radius: 5%;
   justify-self: center;
-`
-
-const TracklistDiv = styled.div`
-  grid-column: 2;
-  grid-row: 2 / span 2;
-  font-family: "Archivo", sans-serif;
-`
-
-
-const TracklistTitleDiv = styled.div`
-font-weight: 700;
-font-size: 35px;
-color: ${props => props.theme.colors.primaryTwo};
--webkit-text-stroke-width: 0px;
--webkit-text-stroke-color: black;
-`
-
-
-const TracklistSubtitleTh = styled.th`
-  font-weight: 700;
-  text-align: left;
-  font-size: 20px;
-  color: black;
-  text-align: center;
-  -webkit-text-stroke-width: 0px;
-  -webkit-text-stroke-color: black;
-`
-
-const TracklistTable = styled.table`
-  grid-column: 2;
-  grid-row: 2 / span 2;
-  width: 100%;
-  font-style: normal;
-  border-spacing: 5px;
-`
-
-const StaticTrackRatingSpan = styled.span`
-
-  &:hover {
-    cursor: pointer;
-  }
-
 `
 
 const ErrorText = styled.span`
   color: ${props => props.theme.colors.error};
 `
 
-const TrackEntry = ({ track, trackRatings, handleTrackRatingChange, editMode, setEditMode }) => {
 
-  // if user is null and they attempt to enter edit mode, redirect to login
-
-  const [showTrackLength, setShowTrackLength] = useState("")
-
-  useEffect(() => {
-    const trackLengthInSeconds = parseInt(track.duration_ms) / 1000
-    const trackMinutes = Math.floor(trackLengthInSeconds / 60)
-    let leftoverSeconds = Math.floor(trackLengthInSeconds - (trackMinutes * 60))
-    if(leftoverSeconds < 10){
-      leftoverSeconds = `0${leftoverSeconds}`
-    }
-    setShowTrackLength(`${trackMinutes}:${leftoverSeconds}`)
-  }, [track])
-  
-  return(
-  <tr>
-    <td>
-      <span style={{color: "#d4d4d4"}}> {track.track_number} </span> {track.name}
-    </td>
-    <td>
-      {showTrackLength}
-    </td>
-    <td style={{ textAlign: "center" }}>
-    { editMode  
-      ? <TextField
-          sx={{ width: "4em", textAlign: "center" }}
-          value={trackRatings[track.id] || ""}
-          size="small"
-          onChange={event => handleTrackRatingChange({ trackID: track.id, value: event.target.value })}
-          InputLabelProps={{
-            shrink: true,
-          }}
-        /> 
-      : <StaticTrackRatingSpan onClick={() => setEditMode(!editMode)}> 
-          { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"} 
-        </StaticTrackRatingSpan>
-    } 
-    </td>
-  </tr>
-  )
-}
-
-const AlbumPage = ({ albumID }) => {
+const AlbumPage = ({ albumID, viewWidth }) => {
 
   const { isAuthenticated, user, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [editMode, setEditMode] = useState(false)
@@ -270,6 +195,7 @@ const AlbumPage = ({ albumID }) => {
   }
 
   const handleTrackRatingSubmit = async () => {
+    console.log("Submitting")
     let error = ""
     Object.keys(trackRatings).forEach(function(trackID, number) {
       if(isNaN(trackRatings[trackID]) || trackRatings[trackID] > 10.0 || trackRatings[trackID] < 0.0){
@@ -340,69 +266,76 @@ const AlbumPage = ({ albumID }) => {
   if(album === null){
     return(<div> Loading... </div>)
   }
-  return(
+  if(viewWidth > MOBILE_VIEW_THRESHOLD){
+    return(
+      <PageDiv>
+        <AlbumPageDiv>
+          <HeadlineDiv>
+              <AlbumTitleDiv> {album.name} </AlbumTitleDiv> 
+              <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
+          </HeadlineDiv>
+          <AlbumImg src={album.images[0].url}  /> 
+          <ReviewForm 
+            textReview={textReview}
+            setTextReview={setTextReview}
+            numberRating={numberRating}
+            setNumberRating={setNumberRating}
+            listened={listened}
+            setListened={setListened}
+            listenList={listenList}
+            setListenList={setListenList}
+            userRating={userRating}
+            handleFormSubmit={handleFormSubmit}
+            editMode={editMode}
+            setEditMode={setEditMode}
+          />
+            <Tracklist 
+              editMode={editMode} 
+              trackRatings={trackRatings} 
+              handleTrackRatingChange={handleTrackRatingChange} 
+              handleTrackRatingSubmit={handleTrackRatingSubmit}
+              setEditMode={setEditMode}
+              album={album}
+            />
+        </AlbumPageDiv>
+      </PageDiv>
+    )
+  }
+  return (
     <PageDiv>
-    <AlbumPageDiv>
+      <MobilePageDiv>
       <HeadlineDiv>
           <AlbumTitleDiv> {album.name} </AlbumTitleDiv> 
           <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
-      </HeadlineDiv>
-      <AlbumImg src={album.images[0].url}  /> 
-      <ReviewForm 
-        textReview={textReview}
-        setTextReview={setTextReview}
-        numberRating={numberRating}
-        setNumberRating={setNumberRating}
-        listened={listened}
-        setListened={setListened}
-        listenList={listenList}
-        setListenList={setListenList}
-        userRating={userRating}
-        handleFormSubmit={handleFormSubmit}
-        editMode={editMode}
-        setEditMode={setEditMode}
-      />
-      <TracklistDiv>
-        <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
-        <TracklistTable>
-        <thead>
-        <tr>
-        <TracklistSubtitleTh style={{ width: "55%" }}> Track title </TracklistSubtitleTh>
-        <TracklistSubtitleTh style={{ width: "15%" }}> Len. </TracklistSubtitleTh>
-        <TracklistSubtitleTh style={{ width: "30%" }}> Your Rating </TracklistSubtitleTh>
-        </tr>
-        </thead>
-        <tbody>
-        {album.tracks.total > 0 ? 
-          album.tracks.items.map(item => 
-          <TrackEntry 
-            key={item.uri} 
-            editMode={editMode} 
-            trackRatings={trackRatings} 
-            handleTrackRatingChange={handleTrackRatingChange} 
-            track={item} 
-            setEditMode={setEditMode}
-            />)
-          : <tr> No tracks to show... </tr>
-        }
-        { editMode ? 
-          <tr>
-            <td>
-              {(trackRatings.error !== "") ? <ErrorText> {trackRatings.error} </ErrorText> : null}
-            </td>
-            <td colSpan="2">
-              <Button 
-              sx={{ color: "black", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}
-              onClick={() => handleTrackRatingSubmit()} > 
-              Submit song ratings </Button>
-            </td>
-          </tr> 
-          : null}
-        </tbody>
-        </TracklistTable>
-        
-      </TracklistDiv>
-    </AlbumPageDiv>
+          </HeadlineDiv>
+          <AlbumImg src={album.images[0].url}  /> 
+          <span style={{ gridColumn: 1, gridRow: 3 }}>
+            <ReviewForm 
+              textReview={textReview}
+              setTextReview={setTextReview}
+              numberRating={numberRating}
+              setNumberRating={setNumberRating}
+              listened={listened}
+              setListened={setListened}
+              listenList={listenList}
+              setListenList={setListenList}
+              userRating={userRating}
+              handleFormSubmit={handleFormSubmit}
+              editMode={editMode}
+              setEditMode={setEditMode}
+            />
+          </span>
+          <span style={{ gridColumn: 1, gridRow: 4 }}>
+            <Tracklist 
+              editMode={editMode} 
+              trackRatings={trackRatings} 
+              handleTrackRatingChange={handleTrackRatingChange} 
+              handleTrackRatingSubmit={handleTrackRatingSubmit}
+              setEditMode={setEditMode}
+              album={album}
+            />
+          </span>
+      </MobilePageDiv>
     </PageDiv>
   )
 }
