@@ -1,6 +1,7 @@
 import "./App.css"
 import React, { useState, useEffect } from "react"
 import albumService from "./services/album.js"
+import auth0Service from "./services/auth0"
 import userService from "./services/user.js"
 import AlbumPage from "./components/AlbumPage.js"
 import AlbumRatings from "./components/AlbumRatings.js"
@@ -27,15 +28,17 @@ const RoutesDiv = styled.div`
 function App() {
   const navigate = useNavigate()
 
+  const { user } = useAuth0()
+
   const [musicSearchText, setMusicSearchText] = useState("")
   const [searchResponse, setSearchResponse] = useState([])
+  const [thisUser, setThisUser] = useState(null)
   const [otherUser, setOtherUser] = useState(null)  // used for viewing profiles found from search
   const [personalAlbumReviews, setPersonalAlbumReviews] = useState([])
   const [following, setFollowing] = useState(null)  // array of users being followed
   const [viewWidth, setViewWidth] = useState(window.innerWidth)
   const [successNotification, setSuccessNotification] = useState("")
   const [errorNotification, setErrorNotification] = useState("")
-  //const [album, setAlbum] = useState(dummyAlbum)
 
   const handleSuccessChange = ({ notification, timeInSec = 5 }) => {
     setSuccessNotification(`${notification}`)
@@ -47,12 +50,33 @@ function App() {
     setErrorNotification(`${notification}`)
     setTimeout(() => setErrorNotification(""), timeInSec * 1000)
   }
+  
+  useEffect(() => { // fetches user profile info if not fetched yet
+    if (typeof user !== "undefined" && typeof user.sub !== "undefined"){
+      if (thisUser === null){
+        console.log("fetching user")
+        const userID = auth0Service.dropStartOfSub(user.sub)
+        userService.getUserProfile({ "userID": userID })
+          .then((response) => {
+            setThisUser(response)
+          })
+          .catch((error) => {
+            const userID = auth0Service.dropStartOfSub(user.sub)
+            setThisUser({
+              "nickname": "ERROR",
+              "picture": " ",
+              "userID": userID
+            })
+          })
+      }
+    }
+  }, [user])
 
   useEffect(() => {
     window.addEventListener("resize", () => setViewWidth(window.innerWidth))
   }, [])
 
-  const musicSearchRequest = async () => {
+  const musicSearchRequest = async () => { 
     let albumResponse, userResponse
     try {
       [albumResponse, userResponse] = await Promise.all([
@@ -62,8 +86,6 @@ function App() {
     } catch (error) {
       navigate(`/error`)
     }
-
-    
     setSearchResponse({"albums": albumResponse, "users": userResponse})
     navigate(`/search/${musicSearchText}`)
   }
@@ -78,7 +100,10 @@ function App() {
     profileMatch.params.userID
     : null 
 
-  console.log("profileID: ", profileID)  
+  //console.log("profileID: ", profileID) 
+  console.log("User is: ", user) 
+  console.log("ThisUser is: ", thisUser)
+
   
   return (
     <div>
@@ -87,6 +112,8 @@ function App() {
         musicSearchRequest={musicSearchRequest}
         musicSearchText={musicSearchText}
         viewWidth={viewWidth}
+        user = {thisUser}
+        setUser = {setThisUser}
       >
       </Header>
       <SuccessNotification notification={successNotification} />
@@ -98,12 +125,15 @@ function App() {
             following={following} 
             setFollowing={setFollowing} 
             viewWidth={viewWidth}
+            user={thisUser}
           />} />
           <Route path="/profile/:userID" element={
             <Profile 
               otherUser={otherUser} 
               setOtherUser={setOtherUser}
               otherUserID={profileID}
+              user={thisUser}
+              setUser={setThisUser}
               following={following}
               setFollowing={setFollowing}
               personalAlbumReviews={personalAlbumReviews}
@@ -114,6 +144,8 @@ function App() {
             <Profile 
               otherUser={null} 
               otherUserID={null}
+              user={thisUser}
+              setUser={setThisUser}
               following = {following}
               setFollowing = {setFollowing}
               personalAlbumReviews={personalAlbumReviews}
@@ -128,13 +160,15 @@ function App() {
             viewWidth={viewWidth}
             handleSuccessChange={handleSuccessChange}
             handleErrorChange={handleErrorChange}
+            user={thisUser}
           />} />
           <Route path="/albumRatings/" element={
             <AlbumRatings 
               otherUser={null} 
-              otherUserID={null}             
+              otherUserID={null} 
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
+              user={thisUser}    
             />}
           />
           <Route path="/error/" element={<div> Something went wrong! Navigate back to the home page. </div>} />

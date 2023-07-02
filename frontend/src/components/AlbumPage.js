@@ -95,9 +95,9 @@ const ErrorText = styled.span`
 `
 
 
-const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange }) => {
+const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange, user }) => {
 
-  const { isAuthenticated, user, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const { isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [editMode, setEditMode] = useState(false)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
@@ -111,6 +111,7 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange 
   const [isPosting, setIsPosting] = useState(false)
  
   console.log("trackRatings is: ", trackRatings)
+  console.log("userrating is: ", userRating)
 
   useEffect(() => {
     albumService.getSpotifyAlbum({ "id": albumID }) 
@@ -128,47 +129,46 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange 
   }, [])
 
   useEffect(() => {
-    if(isAuthenticated && typeof user !== "undefined" && typeof user.sub !== "undefined"){
-    albumRatingService.getRating({ "userID": user.sub, "albumID": albumID })
-      .then(returnedRating => {
-        console.log("Returned rating is: ", returnedRating)
-        if (returnedRating !== null){
-          setUserRating(returnedRating.album)
-        } else {
+    if(user !== null && typeof user !== "undefined" && typeof user.userID !== "undefined"){
+      albumRatingService.getRating({ "userID": user.userID, "albumID": albumID })
+        .then(returnedRating => {
+          if (returnedRating !== null){
+            setUserRating(returnedRating.album)
+          } else {
+            setUserRating({})
+          }
+          if (returnedRating !== null && typeof returnedRating.tracks !== "undefined") {
+            let initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
+              allTracks[current.song_id] = current.rating 
+              return allTracks
+            }, {})
+            initialTrackRatings["error"] = ""
+            setTrackRatings(initialTrackRatings)
+          } else {
+            let initialTrackRatings= { "error": "" }
+            setTrackRatings(initialTrackRatings)
+          }
+        })
+        .catch(error => { 
+          handleErrorChange({ notification: "Could not fetch review data." })
           setUserRating({})
-        }
-        if (returnedRating !== null && typeof returnedRating.tracks !== "undefined") {
-          let initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
+          /*setUserRating(dummyReview.album); 
+          
+          const initialTrackRatings = dummyReview.tracks.reduce((allTracks, current) => {
             allTracks[current.song_id] = current.rating 
+            console.log("All tracks is now: ", allTracks)
             return allTracks
           }, {})
           initialTrackRatings["error"] = ""
-          setTrackRatings(initialTrackRatings)
-        } else {
-          let initialTrackRatings= { "error": "" }
-          setTrackRatings(initialTrackRatings)
-        }
-      })
-      .catch(error => { 
-        handleErrorChange({ notification: "Could not fetch review data." })
-        setUserRating({})
-        /*setUserRating(dummyReview.album); 
-        
-        const initialTrackRatings = dummyReview.tracks.reduce((allTracks, current) => {
-          allTracks[current.song_id] = current.rating 
-          console.log("All tracks is now: ", allTracks)
-          return allTracks
-        }, {})
-        initialTrackRatings["error"] = ""
-        */
-        setTrackRatings({ "error": "" })})
+          */
+          setTrackRatings({ "error": "" })})
     }
   }, [user])
 
   const handleFormSubmit = async () => {
     setIsPosting(true)
     const newRating = {
-      "userID": user.sub, 
+      "userID": user.userID, 
       "albumID": albumID,
       "review": {
         "rating": numberRating.value,
@@ -194,7 +194,7 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange 
       console.log("Token is: ", token)
     try {
       await albumRatingService.postRating({ "rating": newRating, "token": token, "albumID": albumID })
-      setUserRating(newRating)
+      setUserRating(newRating.review)
       setEditMode(false)
       handleSuccessChange({ "notification": "Success! Review saved." })
       setIsPosting(false)
@@ -335,6 +335,7 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange 
               handleFormSubmit={handleFormSubmit}
               editMode={editMode}
               setEditMode={setEditMode}
+              isPosting={isPosting}
             />
           </span>
           <span style={{ gridColumn: 1, gridRow: 4 }}>

@@ -6,6 +6,26 @@ const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/users`
 
 let token = null
 
+const getLocalUser = async ({ userSub }) => {
+  const loggedUserJSON = window.localStorage.getItem("loggedZicUser")
+  let returnUser = null
+  if (loggedUserJSON){
+    const loggedUser = JSON.parse(loggedUserJSON)
+    if (loggedUser.sub === userSub) {
+      returnUser = loggedUser
+    }
+  }
+  if (returnUser === null) {
+    const userID = auth0Service.dropStartOfSub(userSub)
+    const getUrl = `${baseUrl}/${userID}`
+    const fetchedUser = await axios.get(getUrl)
+    window.localStorage.setItem("loggedZicUser", JSON.stringify(fetchedUser.data))
+    returnUser = fetchedUser.data
+  }
+  return returnUser
+}
+
+
 const search = async ({ query }) => {
   const config = {}
   const getUrl = `${baseUrl}/search/${query}`
@@ -29,5 +49,5 @@ const patchUser = async ({ changes, token }) => {
 }
 
 export default {
-  search, patchUser, getUserProfile
+  search, patchUser, getUserProfile, getLocalUser
 }

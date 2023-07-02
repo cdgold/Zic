@@ -71,6 +71,8 @@ const MoreReviewsButton = () => {
 const Profile = ({ otherUser, 
   setOtherUser, 
   otherUserID, 
+  user,
+  setUser,
   personalAlbumReviews, 
   setPersonalAlbumReviews, 
   following, 
@@ -82,7 +84,7 @@ const Profile = ({ otherUser,
 
   const theme = useTheme()
 
-  const { user, isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const { isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [ albumReviews, setAlbumReviews ] = useState([])
   const [ mostRecentAlbums, setMostRecentAlbums ] = useState([])
   const [ favoriteAlbums, setFavoriteAlbums ] = useState([])
@@ -90,10 +92,17 @@ const Profile = ({ otherUser,
   const [ modalIsOpen, setModalIsOpen ] = useState(false)
   const [ headerSize, setHeaderSize ] = useState(`${theme.fonts.sizes.titleLarge}`)
 
+  //console.log("personalAlbumReviews is: ", personalAlbumReviews)
+  //console.log("otherUserID is: ", otherUserID)
 
-
-  console.log("personalAlbumReviews is: ", personalAlbumReviews)
-  console.log("otherUserID is: ", otherUserID)
+  const fetchAlbumInfo = async ({ albumsToFetch }) => {
+    const albumsToGet = albumsToFetch.reduce((allAlbumInfo, currentReview) => {
+      allAlbumInfo.push(currentReview.album_id)
+      return allAlbumInfo
+    }, [])
+    const infoToReturn = await albumService.getMultipleSpotifyAlbums(albumsToGet)
+    return infoToReturn
+  }
 
 useEffect(() => {
   if(viewWidth < SHRINK_TEXT_THRESHOLD){
@@ -104,8 +113,10 @@ useEffect(() => {
   }
 }, [viewWidth])
 
-console.log("header size is: ", headerSize)
-console.log("view width is: ", viewWidth)
+//console.log("header size is: ", headerSize)
+//console.log("view width is: ", viewWidth)
+console.log("Favorite albums is: ", favoriteAlbums)
+console.log("albuminfo is: ", albumInfo)
 
 useEffect(() => {     // fetches album ratings
   if (otherUserID !== null){
@@ -116,14 +127,14 @@ useEffect(() => {     // fetches album ratings
       })
     .catch((error) => { setAlbumReviews([]) })
   }
-  else if(otherUserID === null && isAuthenticated && typeof user.sub !== undefined){
+  else if(otherUserID === null && user !== null && typeof user !== undefined && typeof user.sub !== undefined){
       if(typeof personalAlbumReviews !== "undefined" && personalAlbumReviews.length > 0){
         console.log("Didn't refetch")
         const newPersonalAlbumReviews = [ ...personalAlbumReviews ]
         setAlbumReviews(newPersonalAlbumReviews)
        }
       else { // personal album ratings have not been fetched and stored yet
-        albumRatingService.getAllUserRatings({ "userID": user.sub })
+        albumRatingService.getAllUserRatings({ "userID": user.userID })
         .then((reviews) => {
           setAlbumReviews(reviews)
           setPersonalAlbumReviews(reviews)
@@ -133,7 +144,7 @@ useEffect(() => {     // fetches album ratings
   }}, [user, otherUserID])
   
   useEffect(() => {
-    if(following === null && user !== undefined && user.sub !== undefined){
+    if(following === null && user !== null && user.sub !== undefined){
       followerService.getFollowing({ "userID": user.sub })
         .then((followingResponse) => {
           setFollowing(followingResponse)
@@ -155,19 +166,27 @@ useEffect(() => {     // fetches album ratings
     }
   }, [otherUserID])
  
-  useEffect(() => { // gets spotify info of album ratings
-    if(typeof mostRecentAlbums !== "undefined" && mostRecentAlbums.length !== 0){
-      const albumsToGet = mostRecentAlbums.reduce((allAlbumInfo, currentReview) => {
+  useEffect(() => { // gets spotify info of most recent/ favorite ratings
+    if((Array.isArray(mostRecentAlbums) && mostRecentAlbums.length !== 0) ||
+    (Array.isArray(favoriteAlbums) && favoriteAlbums.length !== 0)){
+      let albumsToGet = mostRecentAlbums.reduce((allAlbumInfo, currentReview) => {
         allAlbumInfo.push(currentReview.album_id)
         return allAlbumInfo
       }, [])
+      albumsToGet = favoriteAlbums.reduce((allAlbumInfo, currentReview) => {
+        if (!(allAlbumInfo.includes(currentReview.album_id))){
+          allAlbumInfo.push(currentReview.album_id)
+        }
+        return allAlbumInfo
+      }, albumsToGet)
       albumService.getMultipleSpotifyAlbums(albumsToGet)
         .then((response) => {
-          setAlbumInfo(response.albums)
+          const newAlbumInfo = response.albums
+          setAlbumInfo(newAlbumInfo)
         })
-        .catch((error) => {setAlbumInfo(null)})
+        .catch((error) => {})
     }
-  }, [mostRecentAlbums])
+  }, [mostRecentAlbums, favoriteAlbums])
 
 useEffect(() => { // sorts album ratings by time posted, truncates
   if(typeof albumReviews !== "undefined" && albumReviews.length !== 0){
@@ -256,6 +275,13 @@ useEffect(() => { // sorts album ratings by time posted, truncates
     return (
     <div>
       Need to login to see your profile.
+    </div>
+    )
+  }
+  if (user === null) {
+    return (
+    <div>
+      Loading...
     </div>
     )
   }

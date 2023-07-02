@@ -195,15 +195,15 @@ const SearchBar = ({ theme, musicSearchRequest, setMusicSearchText, viewWidth })
   )
 }
 
-const Header = ({ musicSearchRequest, setMusicSearchText, viewWidth }) => {
+const Header = ({ musicSearchRequest, setMusicSearchText, viewWidth, user, setUser }) => {
   const theme = useTheme()
 
   const navigate = useNavigate()
   const [ menuStyling, setMenuStyling ] = useState(closedMenuStyles)
-  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
+  const { loginWithRedirect, logout, isAuthenticated } = useAuth0();
 
   //console.log("menu visibile is: ", menuVisible)
-  console.log("viewWidth is: ", viewWidth)
+  //console.log("viewWidth is: ", viewWidth)
 
   const handleLogin = async () => {
     await loginWithRedirect()
@@ -256,7 +256,7 @@ const Header = ({ musicSearchRequest, setMusicSearchText, viewWidth }) => {
         setMusicSearchText={setMusicSearchText}
         theme={theme}
         />
-      { (isAuthenticated && typeof user.nickname !== "undefined")
+      { (user !== null && typeof user !== "undefined" && typeof user.nickname !== "undefined")
           ? <>
           <Button sx={topRightButtonStyle} variant="text" onClick={handleLogout}> LOGOUT </Button>
           <Button sx={topRightButtonStyle} variant="text" onClick={() => navigate("/profile")}> {user.nickname} </Button> 

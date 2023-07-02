@@ -87,7 +87,36 @@ const ButtonSpan = styled.span`
   margin-right: 1rem;
 `
 
+const SignupButton = styled.button`
+  all: unset;
+  pointer-events:${props => props.disabled ? 'none' : null};
+  font-family: ${props => props.theme.bodyFonts};
+  background-color: ${props => props.theme.colors.primaryOne};
+  border-radius: 8px;
+  color: ${props => props.theme.colors.primaryThree};
+  border-color: ${props => props.theme.colors.secondaryOne};
+  font-size: ${props => props.theme.fonts.sizes.bodyLarge};
+  width: fit-content;
+  padding: 5px 15px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: ${props => props.theme.colors.secondaryOne}; 
+  }
+
+  &:active {
+    background-color: ${props=>props.theme.colors.tertiaryOne};
+  }
+
+  &:disabled {
+    background-color: ${props=>props.theme.colors.disabled};
+    color: ${props=>props.theme.colors.disabledText};
+  }
+`
+
+
 const Signup = ({ viewWidth }) => {
+  const theme = useTheme()
   
   const { loginWithRedirect } = useAuth0()
 
@@ -102,15 +131,14 @@ const Signup = ({ viewWidth }) => {
                     Zic lets you track your favorite albums and share them with others.
                 </Subtitle>
                 <ButtonSpan>
-                    <AcceptButton 
-                    text={"Sign up"}
-                    onclick={(() => loginWithRedirect({
+                  <SignupButton 
+                    onClick={(() => loginWithRedirect({
                     authorizationParams:{
                         screen_hint: "signup"
                     }
                     }))}>
-                    Sign up
-                    </AcceptButton>
+                      Sign up
+                  </SignupButton>
                 </ButtonSpan>
             </SignupTextContainer>
             <AlbumImg1 src={flowerBoyCover} alt={"Flower Boy by Tyler, The Creator's album cover"}></AlbumImg1>
@@ -130,15 +158,14 @@ const Signup = ({ viewWidth }) => {
                     Zic lets you track your favorite albums and share them with others.
                 </Subtitle>
                 <ButtonSpan>
-                    <AcceptButton 
-                    text={"Sign up"}
-                    onclick={(() => loginWithRedirect({
+                    <SignupButton 
+                    onClick={(() => loginWithRedirect({
                     authorizationParams:{
                         screen_hint: "signup"
                     }
                     }))}>
-                    Sign up
-                    </AcceptButton>
+                      Sign up
+                    </SignupButton>
                 </ButtonSpan>
             </SignupTextContainer>
         </span>

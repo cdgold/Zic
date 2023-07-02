@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react"
 import { useAuth0 } from '@auth0/auth0-react'
 import followerService from "../services/follower.js"
 import albumService from "../services/album.js"
-import AcceptButton from "../styling/reusable/AcceptButton.js"
 import dummyResults from "../test/dummySpotifyAlbums.js"
 import styled, { useTheme } from "styled-components"
 import { Link } from "react-router-dom"
@@ -107,7 +106,7 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
 
   const theme = useTheme()
 
-  useEffect(() => {
+  useEffect(() => { 
     if (Array.isArray(allAlbumInfo) && allAlbumInfo.length > 0){
       const foundAlbum = allAlbumInfo.find((album) => album.id === post.album_id)
       if (typeof foundAlbum !== "undefined"){
@@ -116,7 +115,7 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
     }
   }, [post, allAlbumInfo])
 
-  useEffect(() => {
+  useEffect(() => {  
     if (Array.isArray(allUserInfo) && allUserInfo.length > 0){
       const foundUser = allUserInfo.find((user) => user.id === post.auth0_id)
       if (typeof foundUser !== "undefined"){
@@ -163,10 +162,9 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
   return(null)
 }
 
-const Home = ({ following, setFollowing, viewWidth }) => {
+const Home = ({ following, setFollowing, viewWidth, user }) => {
   const {
     isLoading,
-    user,
     loginWithRedirect
   } = useAuth0();
 
@@ -174,6 +172,8 @@ const Home = ({ following, setFollowing, viewWidth }) => {
 
   const [followingPosts, setFollowingPosts] = useState(null)
   const [albumInfo, setAlbumInfo] = useState(null)
+
+  console.log("Following is: ", following)
 
 
   /*
@@ -192,8 +192,9 @@ const Home = ({ following, setFollowing, viewWidth }) => {
 
   
   useEffect(() => {
-    if(following === null && typeof user !== "undefined" && typeof user.sub !== "undefined"){
-      followerService.getFollowingPosts({ "userID": user.sub, "numPosts": 15 })
+    if(following === null && user !== null && typeof user !== "undefined" && typeof user.userID !== "undefined"){
+      console.log("fetching following posts")
+      followerService.getFollowingPosts({ "userID": user.userID, "numPosts": 15 })
         .then((response) => {
           if (response !== null){
             setFollowingPosts(response.posts)
@@ -210,7 +211,7 @@ const Home = ({ following, setFollowing, viewWidth }) => {
           setAlbumInfo([])
         })
     } else if (Array.isArray(following) && following.length > 0){
-      followerService.getFollowingPosts({ "userID": user.sub, "userInfo": false })
+      followerService.getFollowingPosts({ "userID": user.userID, "userInfo": false })
         .then((response) => {
           if (response !== null){
             setFollowingPosts(response.posts)
@@ -253,7 +254,7 @@ const Home = ({ following, setFollowing, viewWidth }) => {
     }
   }, [followingPosts])
 
-  if (typeof user === "undefined" && !(isLoading)){
+  if ((typeof user === "undefined" || user === null) && !(isLoading)){
     return(
       <Page>
         <SignupPage

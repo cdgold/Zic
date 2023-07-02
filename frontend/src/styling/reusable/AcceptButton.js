@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 
 const Button = styled.button`
   all: unset;
-  pointer-events:${(props)=>props.disabled?'none':null};
+  pointer-events:${props => props.disabled ? 'none' : null};
   font-family: ${props => props.theme.bodyFonts};
   background-color: ${props => props.theme.colors.primaryTwo};
   border-radius: 8px;
@@ -31,9 +31,9 @@ const Button = styled.button`
 `
 
 // softMax determines if review_text can be expanded or not
-const AcceptButton = ({ onclick, text, disabled = false }) => {
+const AcceptButton = ({ onclick, text, disabled = false, color }) => {
   return(
-    <Button disabled={disabled} onClick={() => {onclick()}}>
+    <Button color={color} disabled={disabled} onClick={() => {onclick()}}>
         {text}
     </Button>
   )

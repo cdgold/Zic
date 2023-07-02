@@ -25,8 +25,9 @@ const getRating = async ({ userID, albumID }) => {
   console.log("albumRatingResponse is", albumRatingResponse)
   let albumReview
   let trackReviews
-  if (albumRatingResponse.status === "200"){
+  if (albumRatingResponse.status === 200){
     albumReview = albumRatingResponse.data.album
+    console.log()
     if (typeof albumReview !== "undefined" && typeof albumReview.rating !== "undefined"){
       albumReview.rating = stringifyRating({ "rating": albumReview.rating })
     }

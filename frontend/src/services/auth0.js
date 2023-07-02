@@ -12,7 +12,4 @@ const setHeaderToken = ({ token, config }) => {
     return config
 }
 
-const attemptTokenSilently = async () => {
-}
-
-export default { dropStartOfSub, setHeaderToken, attemptTokenSilently }
+export default { dropStartOfSub, setHeaderToken }

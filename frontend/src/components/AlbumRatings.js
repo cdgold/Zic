@@ -42,9 +42,9 @@ const Title = styled.div`
   font-family: ${props => props.theme.titleFonts};
 `
 
-const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUserID }) => {
+const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUserID, user }) => {
   
-    const { user, isAuthenticated } = useAuth0()
+    const { isAuthenticated } = useAuth0()
     const [ albumReviews, setAlbumReviews ] = useState([])
     const [ sortedAlbums, setSortedAlbums ] = useState([])
     const [ albumInfo, setAlbumInfo ] = useState([])
@@ -80,8 +80,8 @@ const AlbumRatings = ({ personalAlbumReviews, setPersonalAlbumReviews, otherUser
     
     useEffect(() => {
       if(typeof personalAlbumReviews !== undefined && personalAlbumReviews.length === 0){
-        if(isAuthenticated && otherUserID === null && typeof user.sub !== "undefined"){
-            albumRatingService.getAllUserRatings({ "userID": user.sub })
+        if(user !== null && otherUserID === null && typeof user !== "undefined" && typeof user.userID !== "undefined"){
+            albumRatingService.getAllUserRatings({ "userID": user.userID })
               .then((reviews) => {
                 setAlbumReviews(reviews)
                 setPersonalAlbumReviews(reviews)

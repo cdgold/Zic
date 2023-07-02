@@ -38,13 +38,17 @@ const LoginModal = ({ isOpen, setIsOpen, user }) => {
       try { 
         token = await getAccessTokenSilently({
         authorizationParams: {
-          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`,
+          ignoreCache: true,
+          scope: "offline_access"
         },
       })}
       catch (error) {
         token = await getAccessTokenWithPopup({
           authorizationParams: {
-            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`,
+            ignoreCache: true,
+            scope: "offline_access"
           },
         })
       }

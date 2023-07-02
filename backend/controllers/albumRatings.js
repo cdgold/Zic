@@ -40,6 +40,7 @@ albumRatingsRouter.get("/:userID/:albumID", async (request, response) => {
 // trackRatings is an array of tracks, made up of [id, rating]
 
 albumRatingsRouter.post("/", validateAccessToken, async (request, response, next) => {
+  const auth = request.auth
   let userID = auth.payload.sub
   userID = dropStartOfSub(userID)
   const albumID = request.body.albumID

@@ -15,8 +15,11 @@ root.render(
   <Auth0Provider 
     domain={process.env.REACT_APP_AUTH0_DOMAIN}
     clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
+    useRefreshTokens={true}
     authorizationParams={{
-      redirect_uri: `${process.env.REACT_APP_REDIRECT}/profile/`
+      redirect_uri: `${process.env.REACT_APP_REDIRECT}/profile/`,
+      ignoreCache: true,
+      scope: "offline_access"
     }
   }
   >

@@ -34,14 +34,15 @@ const getFollowing = async ({ userID }) => {
 const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
   userID = auth0Service.dropStartOfSub(userID)
   let getUrl = `${baseUrl}/following/posts/${userID}`
-  console.log("requesting: ", getUrl)
+  //console.log("requesting: ", getUrl)
   if (numPosts){
     getUrl = `${getUrl}?numPosts=${numPosts}`
   }
   if (userInfo){
-    getUrl = `${getUrl}?userInfo=${numPosts}`
+    getUrl = `${getUrl}?userInfo=${userInfo}`
   }
   const response = await axios.get(getUrl)
+  //console.log("Returned ", response.data, " with userID: ", userID)
   let returnValue
   if(response.status === 200){
     response.data.posts.forEach((element, index, array) => {

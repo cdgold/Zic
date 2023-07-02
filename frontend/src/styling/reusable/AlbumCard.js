@@ -62,7 +62,6 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
 
   useEffect(() => {
     const thisAlbum = allAlbumInfo.find((album) => review.album_id === album.id)
-    console.log("Matching album ID is: ", thisAlbum, " for review: ", review)
     setAlbum(thisAlbum)
   }, [allAlbumInfo, review])
 
@@ -103,7 +102,9 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
 
   )
   } else {
-    return(null)
+    return(<div>
+      "what"
+    </div>)
   }
 }
 

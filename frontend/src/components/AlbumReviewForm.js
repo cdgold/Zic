@@ -134,6 +134,7 @@ const ReviewForm = ({ textReview,
   const [listIconColor, setListIconColor] = useState("")
 
   useEffect(() => {
+    console.log("entered")
     if (!listened) {
       setMusicIconColor(theme.colors.primaryOne)
     }
@@ -184,7 +185,7 @@ const ReviewForm = ({ textReview,
   const handleNumberRatingChange = (event) => {
     const parsedFloat = parseFloat(event.target.value)
     let newNumberRating = {value: event.target.value}
-    if(isNaN(parsedFloat) || parsedFloat > 10.0 || parsedFloat < 0.0){
+    if((isNaN(parsedFloat) || parsedFloat > 10.0 || parsedFloat < 0.0) && numberRating.value !== ""){
       newNumberRating["error"] = "Rating must be between 0.0 and 10.0."
     }
     else{     // value is a float between 0-10
@@ -196,18 +197,20 @@ const ReviewForm = ({ textReview,
   }
 
   useEffect(() => {
+    console.log("setting with", userRating)
     if(userRating !== null && typeof userRating !== "undefined"){
       if(typeof userRating.review_text !== "undefined") {
         setTextReview(userRating.review_text)
       }
       if(typeof userRating.rating !== "undefined") {
+        console.log("in here with", userRating.rating)
         setNumberRating({"value": userRating.rating, "error": ""})
       }
       if(typeof userRating.listened !== "undefined") {
         setListened(userRating.listened)
       }
       if(typeof userRating.listenList !== "undefined") {
-        setListened(userRating.listenList)
+        setListenList(userRating.listenList)
       }
     }
   }, [userRating])
