@@ -3,8 +3,6 @@ import axios from "axios"
 
 const baseUrl = `${process.env.REACT_APP_API_BASE_URL}/api/albums`
 
-let token = null
-
 // gets item from database
 const getAlbum = async ({ id }) => {
   const urlToGet = `${baseUrl}/${id}`

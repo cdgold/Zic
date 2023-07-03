@@ -1,18 +1,15 @@
 import React, { useState, useEffect } from "react"
-import { FormControl, TextField, Button } from "@mui/material"
 import styled from "styled-components"
 import albumService from "../services/album.js"
 import albumRatingService from "../services/albumRating.js"
 import songRatingService from "../services/songRating.js"
-import auth0Service from "../services/auth0.js"
-import { useNavigate } from "react-router-dom"
-import dummyAlbum from "../test/dummyData.js"
+//import dummyAlbum from "../test/dummyData.js"
 import ReviewForm from "./AlbumReviewForm.js"
 import Tracklist from "./Tracklist.js"
 import { useAuth0 } from "@auth0/auth0-react"
 
-const MOBILE_VIEW_THRESHOLD = 650;
-
+const MOBILE_VIEW_THRESHOLD = 650
+/*
 const dummyReview = {
   "album": {
     "rating": 90,
@@ -34,30 +31,24 @@ const dummyReview = {
     }
   ]
 }
-
-const ALBUM_PAGE_DIV_COLUMN_1_REM = 30
-const ALBUM_PAGE_DIV_COLUMN_2_REM = 30
+*/
 
 const PageDiv = styled.div`
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   margin-left: .5rem;
   width: 95vw;
-  display: flex;
   justify-content: center;
-`
-
-const AlbumPageDiv = styled.div`
   display: grid;
-  grid-template-columns: 45% 45%;
-  grid-template-rows: min-content min-content 1fr;
-  justify-content: center;
-  row-gap: 1rem;
-  column-gap: 1.5rem;
-  margin: 0 auto;
-`
-
-const MobilePageDiv = styled(AlbumPageDiv)`
-  grid-template-columns: 100%;
+  @media (min-width: ${MOBILE_VIEW_THRESHOLD}px) {
+    grid-template-columns: 45% 45%;
+    grid-template-rows: min-content min-content 1fr;
+    justify-content: center;
+    row-gap: 1rem;
+    column-gap: 1.5rem;
+  }
+  @media (max-width: ${MOBILE_VIEW_THRESHOLD}px) {
+    grid-template-columns: 100%;
+  }
 `
 
 const HeadlineDiv = styled.div`
@@ -90,31 +81,48 @@ const AlbumImg = styled.img`
   justify-self: center;
 `
 
-const ErrorText = styled.span`
-  color: ${props => props.theme.colors.error};
+const ReviewFormMobileDiv = styled.div`
+  grid-column: 1;
+  grid-row: 3;
+`
+
+const TracklistMobileDiv = styled.div`
+  @media (min-width: ${MOBILE_VIEW_THRESHOLD}px){
+    grid-column: 2;
+    grid-row: 2 / span 2;
+  }
+  @media (max-width: ${MOBILE_VIEW_THRESHOLD}px){
+    grid-column: 1;
+    grid-row: 4;
+  }
 `
 
 
-const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange, user }) => {
+const AlbumPage = ({ albumID, handleSuccessChange, handleErrorChange, user }) => {
 
-  const { isAuthenticated, getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const { getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
   const [editMode, setEditMode] = useState(false)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
   const [userRating, setUserRating] = useState(null)
   const [trackRatings, setTrackRatings] = useState({ error: "" })
   const [textReview, setTextReview] = useState("")
-  const [numberRating, setNumberRating] = useState({value: "", error: ""})
+  const [numberRating, setNumberRating] = useState({ value: "", error: "" })
   const [listened, setListened] = useState(false)
   const [listenList, setListenList] = useState(false)
   const [originalRating , setOriginalRating] = useState(null)
   const [isPosting, setIsPosting] = useState(false)
- 
-  console.log("trackRatings is: ", trackRatings)
-  console.log("userrating is: ", userRating)
+
+  //console.log("trackRatings is: ", trackRatings)
+  //console.log("userrating is: ", userRating)
+  /*
+  useEffect(() => {
+
+  })
+  */
 
   useEffect(() => {
-    albumService.getSpotifyAlbum({ "id": albumID }) 
+    albumService.getSpotifyAlbum({ "id": albumID })
       .then(returnedAlbum => {
         setAlbum(returnedAlbum)
         console.log(returnedAlbum)
@@ -139,7 +147,7 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
           }
           if (returnedRating !== null && typeof returnedRating.tracks !== "undefined") {
             let initialTrackRatings = returnedRating.tracks.reduce((allTracks, current) => {
-              allTracks[current.song_id] = current.rating 
+              allTracks[current.song_id] = current.rating
               return allTracks
             }, {})
             initialTrackRatings["error"] = ""
@@ -149,13 +157,13 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
             setTrackRatings(initialTrackRatings)
           }
         })
-        .catch(error => { 
+        .catch(error => {
           handleErrorChange({ notification: "Could not fetch review data." })
           setUserRating({})
-          /*setUserRating(dummyReview.album); 
-          
+          /*setUserRating(dummyReview.album);
+
           const initialTrackRatings = dummyReview.tracks.reduce((allTracks, current) => {
-            allTracks[current.song_id] = current.rating 
+            allTracks[current.song_id] = current.rating
             console.log("All tracks is now: ", allTracks)
             return allTracks
           }, {})
@@ -167,8 +175,8 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
 
   const handleFormSubmit = async () => {
     setIsPosting(true)
-    const newRating = {
-      "userID": user.userID, 
+    let newRating = {
+      "userID": user.userID,
       "albumID": albumID,
       "review": {
         "rating": numberRating.value,
@@ -178,26 +186,31 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
       }
     }
     let token
-    try { 
-        token = await getAccessTokenSilently({
+    try {
+      token = await getAccessTokenSilently({
         authorizationParams: {
           audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
         },
       })}
-      catch (error) {
-        token = await getAccessTokenWithPopup({
-          authorizationParams: {
-            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
-          },
-        })
-      }
-      console.log("Token is: ", token)
+    catch (error) {
+      token = await getAccessTokenWithPopup({
+        authorizationParams: {
+          audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+        },
+      })
+    }
+    //console.log("Token is: ", token)
     try {
       await albumRatingService.postRating({ "rating": newRating, "token": token, "albumID": albumID })
-      setUserRating(newRating.review)
-      setEditMode(false)
+      let newReview = newRating.review
+      if (typeof newReview.rating !== "undefined"){
+        newReview["rating"] = albumRatingService.stringifyRating({ "rating": newReview.rating })
+      }
+      console.log("new review is now: ", newReview)
+      setUserRating(newReview)
       handleSuccessChange({ "notification": "Success! Review saved." })
       setIsPosting(false)
+      setEditMode(false)
     }
     catch (error) {
       handleErrorChange({ "notification": "Error while posting album review." })
@@ -208,26 +221,25 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
   const handleTrackRatingSubmit = async () => {
     console.log("Submitting")
     let error = ""
-    Object.keys(trackRatings).forEach(function(trackID, number) {
+    Object.keys(trackRatings).forEach(function(trackID) {
       if(isNaN(trackRatings[trackID]) || trackRatings[trackID] > 10.0 || trackRatings[trackID] < 0.0){
-          error = "Song ratings must be between 0.0 and 10.0."
+        error = "Song ratings must be between 0.0 and 10.0."
       }})
-    console.log("Error is: ", error)
     if (error === ""){
       let token
-      try { 
-          token = await getAccessTokenSilently({
+      try {
+        token = await getAccessTokenSilently({
           authorizationParams: {
             audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
           },
         })}
-        catch (error) {
-          token = await getAccessTokenWithPopup({
-            authorizationParams: {
-              audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
-            },
-          })
-        }
+      catch (error) {
+        token = await getAccessTokenWithPopup({
+          authorizationParams: {
+            audience: `${process.env.REACT_APP_AUTH0_AUDIENCE}`
+          },
+        })
+      }
       songRatingService.postMultiple({ "ratings": trackRatings, "token": token, "albumID": albumID })
     }
     else {
@@ -241,8 +253,9 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
     setTrackRatings(newTrackRatings)
   }
 
-  useEffect(() => {
-    if (editMode === true){
+  const handleEditModeChangeWithStoredReset = (value) => {
+    setEditMode(value)
+    if (value === true){
       const gottenRating = { ...userRating, "tracks": trackRatings }
       setOriginalRating(gottenRating)
     } else {
@@ -272,83 +285,45 @@ const AlbumPage = ({ albumID, viewWidth, handleSuccessChange, handleErrorChange,
         }
       }
     }
-  }, [editMode])
-  
+  }
+
   if(album === null){
     return(<div> Loading... </div>)
   }
-  if(viewWidth > MOBILE_VIEW_THRESHOLD){
-    return(
-      <PageDiv>
-        <AlbumPageDiv>
-          <HeadlineDiv>
-              <AlbumTitleDiv> {album.name} </AlbumTitleDiv> 
-              <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
-          </HeadlineDiv>
-          <AlbumImg src={album.images[0].url}  /> 
-          <ReviewForm 
-            textReview={textReview}
-            setTextReview={setTextReview}
-            numberRating={numberRating}
-            setNumberRating={setNumberRating}
-            listened={listened}
-            setListened={setListened}
-            listenList={listenList}
-            setListenList={setListenList}
-            userRating={userRating}
-            handleFormSubmit={handleFormSubmit}
-            editMode={editMode}
-            setEditMode={setEditMode}
-            isPosting={isPosting}
-          />
-            <Tracklist 
-              editMode={editMode} 
-              trackRatings={trackRatings} 
-              handleTrackRatingChange={handleTrackRatingChange} 
-              handleTrackRatingSubmit={handleTrackRatingSubmit}
-              setEditMode={setEditMode}
-              album={album}
-            />
-        </AlbumPageDiv>
-      </PageDiv>
-    )
-  }
-  return (
+  return(
     <PageDiv>
-      <MobilePageDiv>
       <HeadlineDiv>
-          <AlbumTitleDiv> {album.name} </AlbumTitleDiv> 
-          <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
-          </HeadlineDiv>
-          <AlbumImg src={album.images[0].url}  /> 
-          <span style={{ gridColumn: 1, gridRow: 3 }}>
-            <ReviewForm 
-              textReview={textReview}
-              setTextReview={setTextReview}
-              numberRating={numberRating}
-              setNumberRating={setNumberRating}
-              listened={listened}
-              setListened={setListened}
-              listenList={listenList}
-              setListenList={setListenList}
-              userRating={userRating}
-              handleFormSubmit={handleFormSubmit}
-              editMode={editMode}
-              setEditMode={setEditMode}
-              isPosting={isPosting}
-            />
-          </span>
-          <span style={{ gridColumn: 1, gridRow: 4 }}>
-            <Tracklist 
-              editMode={editMode} 
-              trackRatings={trackRatings} 
-              handleTrackRatingChange={handleTrackRatingChange} 
-              handleTrackRatingSubmit={handleTrackRatingSubmit}
-              setEditMode={setEditMode}
-              album={album}
-            />
-          </span>
-      </MobilePageDiv>
+        <AlbumTitleDiv> {album.name} </AlbumTitleDiv>
+        <AlbumTitleSublineDiv> by {album.artists[0].name} {`(${albumYear})`}</AlbumTitleSublineDiv>
+      </HeadlineDiv>
+      <AlbumImg src={album.images[0].url}  />
+      <ReviewFormMobileDiv>
+        <ReviewForm
+          textReview={textReview}
+          setTextReview={setTextReview}
+          numberRating={numberRating}
+          setNumberRating={setNumberRating}
+          listened={listened}
+          setListened={setListened}
+          listenList={listenList}
+          setListenList={setListenList}
+          userRating={userRating}
+          handleFormSubmit={handleFormSubmit}
+          editMode={editMode}
+          setEditMode={handleEditModeChangeWithStoredReset}
+          isPosting={isPosting}
+        />
+      </ReviewFormMobileDiv>
+      <TracklistMobileDiv>
+        <Tracklist
+          editMode={editMode}
+          trackRatings={trackRatings}
+          handleTrackRatingChange={handleTrackRatingChange}
+          handleTrackRatingSubmit={handleTrackRatingSubmit}
+          setEditMode={handleEditModeChangeWithStoredReset}
+          album={album}
+        />
+      </TracklistMobileDiv>
     </PageDiv>
   )
 }

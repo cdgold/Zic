@@ -15,6 +15,7 @@ const stringifyRating = ({ rating }) => {
   else {  // rating string 3 digits, must be 10.0
     ratingString = "10.0"
   }
+  console.log("returning: ", ratingString)
   return ratingString
 }
 
@@ -39,11 +40,11 @@ const getRating = async ({ userID, albumID }) => {
       return(track)
     })
   }
-    else { // status is not 200
-      console.log("response is not 200")
-      return null
-    }
-  const albumAndTracks = {"album": albumReview, "tracks": trackReviews}
+  else { // status is not 200
+    console.log("response is not 200")
+    return null
+  }
+  const albumAndTracks = { "album": albumReview, "tracks": trackReviews }
   console.log("albumAndTracks is: ", albumAndTracks)
   return albumAndTracks
 }
@@ -53,14 +54,14 @@ const postRating = async ({ rating, token }) => {
   config = auth0Service.setHeaderToken({ "config": config, "token": token })
   const newUserID = auth0Service.dropStartOfSub(rating.userID)
   rating["userID"] = newUserID
-    const urlToPost = `${baseUrl}`
-    if (typeof rating.review.rating !== "undefined" && !(isNaN(rating.review.rating))){
-      rating.review.rating = rating.review.rating * 10
-    }
-    console.log("posting to: ", urlToPost, " with ", rating)
-    const albumRatingResponse = await axios.post(urlToPost, rating, config)
-    return albumRatingResponse.data
+  const urlToPost = `${baseUrl}`
+  if (typeof rating.review.rating !== "undefined" && !(isNaN(rating.review.rating))){
+    rating.review.rating = rating.review.rating * 10
   }
+  console.log("posting to: ", urlToPost, " with ", rating)
+  const albumRatingResponse = await axios.post(urlToPost, rating, config)
+  return albumRatingResponse.data
+}
 
 const getAllUserRatings = async ({ userID }) => {
   const newUserID = auth0Service.dropStartOfSub(userID)
@@ -76,7 +77,7 @@ const getAllUserRatings = async ({ userID }) => {
   })
   console.log("track reviews is:", albumReviews)
   return albumReviews
-} 
+}
 
 export default {
   stringifyRating,

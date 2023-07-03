@@ -8,20 +8,17 @@ import { Auth0Provider } from "@auth0/auth0-react"
 import { ThemeProvider } from "styled-components"
 
 const root = ReactDOM.createRoot(document.getElementById("root"))
-
-console.log("redirect uri is: ", `${process.env.REACT_APP_REDIRECT}/profile/`)
-
 root.render(
-  <Auth0Provider 
+  <Auth0Provider
     domain={process.env.REACT_APP_AUTH0_DOMAIN}
     clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
     useRefreshTokens={true}
+    cacheLocation="localstorage"
     authorizationParams={{
       redirect_uri: `${process.env.REACT_APP_REDIRECT}/profile/`,
-      ignoreCache: true,
       scope: "offline_access"
     }
-  }
+    }
   >
     <Router>
       <ThemeProvider theme={Theme}>

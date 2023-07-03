@@ -36,12 +36,12 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
   const handleShow = () => {
     setHideOnReveal("none")
     setShowOnReveal("")
-  } 
+  }
 
   const handleHide = () => {
     setHideOnReveal("")
     setShowOnReveal("none")
-  } 
+  }
 
   useEffect(() => {
     if (typeof review.rating !== "undefined" && review.rating !== "" && !(isNaN(review.rating))){
@@ -76,34 +76,34 @@ const AlbumCard = ({ review, allAlbumInfo, maxChar, isSoftMax }) => {
   })
 
   if(album !== null && album !== undefined && album.id !== undefined){
-  return(
+    return(
       <AlbumCardStyled>
         <Link to={`/album/${album.id}`} style={{ textDecoration: "none", color: "inherit", width: "100%" }}>
           <div style={{ display: "flex", justifyContent: "center", width: "100%" }} >
             <AlbumImg src={album.images[0].url} />
           </div>
         </Link>
-        <AlbumText style={{ marginTop: ".5rem", fontSize: theme.fonts.sizes.bodyLarge }}> 
-          <b>{album.name}</b> 
-          <br></br> 
-          {album.artists[0].name} 
+        <AlbumText style={{ marginTop: ".5rem", fontSize: theme.fonts.sizes.bodyLarge }}>
+          <b>{album.name}</b>
+          <br></br>
+          {album.artists[0].name}
         </AlbumText>
-        <AlbumText style={{ color: fontColor, fontFamily: theme.titleFonts, fontSize: theme.fonts.sizes.titleTiny }}> {review.rating} </AlbumText> 
-        <AlbumText style={{ textAlign: "center", display: hideOnReveal }}>  
-          {shortenedString ? shortenedString : review.review_text} 
+        <AlbumText style={{ color: fontColor, fontFamily: theme.titleFonts, fontSize: theme.fonts.sizes.titleTiny }}> {review.rating} </AlbumText>
+        <AlbumText style={{ textAlign: "center", display: hideOnReveal }}>
+          {shortenedString ? shortenedString : review.review_text}
         </AlbumText>
-        { isSoftMax && shortenedString !== null ? 
-          <button style={{ display: hideOnReveal }} onClick={() => handleShow()} >expand</button> 
-          : null 
+        { isSoftMax && shortenedString !== null ?
+          <button style={{ display: hideOnReveal }} onClick={() => handleShow()} >expand</button>
+          : null
         }
         <AlbumText style={{ textAlign: "justify", display: showOnReveal }}>  {review.review_text} </AlbumText>
         <button style={{ display: showOnReveal, alignText: "right" }} onClick={() => handleHide()} >collapse</button>
       </AlbumCardStyled>
 
-  )
+    )
   } else {
     return(<div>
-      "what"
+      what
     </div>)
   }
 }

@@ -8,8 +8,9 @@ import AlbumRatings from "./components/AlbumRatings.js"
 import Home from "./components/Home.js"
 import Profile from "./components/Profile.js"
 import Header from "./components/Header.js"
+import Footer from "./components/Footer.js"
 import SearchResults from "./components/SearchResults.js"
-import {SuccessNotification, ErrorNotification} from "./styling/reusable/Notification.js"
+import { SuccessNotification, ErrorNotification } from "./styling/reusable/Notification.js"
 import {
   Routes, Route, useMatch, useNavigate
 } from "react-router-dom"
@@ -20,12 +21,21 @@ import { useAuth0 } from "@auth0/auth0-react"
 // https://coolors.co/0015ff-000000-f02f2f-001667-840012
 
 const RoutesDiv = styled.div`
-  position: absolute;
-  top: ${props => props.theme.headerMargin};
-  width: 100vw;
+  margin-top: ${props => props.theme.headerMargin};
+  padding-bottom: ${props => props.theme.footerHeight};
+  overflow-x: hidden;
+`
+
+const PageContainer = styled.div`
+  position: relative;
+  margin-left: 0;
+  overflow-x: hidden;
+  min-height: 100vh;
 `
 
 function App() {
+  document.body.style.margin = "0px"
+
   const navigate = useNavigate()
 
   const { user } = useAuth0()
@@ -50,7 +60,7 @@ function App() {
     setErrorNotification(`${notification}`)
     setTimeout(() => setErrorNotification(""), timeInSec * 1000)
   }
-  
+
   useEffect(() => { // fetches user profile info if not fetched yet
     if (typeof user !== "undefined" && typeof user.sub !== "undefined"){
       if (thisUser === null){
@@ -60,7 +70,7 @@ function App() {
           .then((response) => {
             setThisUser(response)
           })
-          .catch((error) => {
+          .catch(() => {
             const userID = auth0Service.dropStartOfSub(user.sub)
             setThisUser({
               "nickname": "ERROR",
@@ -76,37 +86,37 @@ function App() {
     window.addEventListener("resize", () => setViewWidth(window.innerWidth))
   }, [])
 
-  const musicSearchRequest = async () => { 
+  const musicSearchRequest = async () => {
     let albumResponse, userResponse
     try {
       [albumResponse, userResponse] = await Promise.all([
-      albumService.searchSpotify({ query: musicSearchText, type: "album" }),
-      userService.search({ query: musicSearchText })
-    ])
+        albumService.searchSpotify({ query: musicSearchText, type: "album" }),
+        userService.search({ query: musicSearchText })
+      ])
     } catch (error) {
       navigate(`/error`)
     }
-    setSearchResponse({"albums": albumResponse, "users": userResponse})
+    setSearchResponse({ "albums": albumResponse, "users": userResponse })
     navigate(`/search/${musicSearchText}`)
   }
 
   const albumMatch = useMatch("/album/:id")
   const albumID = albumMatch ?
     albumMatch.params.id
-    : null 
-  
+    : null
+
   const profileMatch = useMatch("/profile/:userID")
   const profileID = profileMatch ?
     profileMatch.params.userID
-    : null 
+    : null
 
-  //console.log("profileID: ", profileID) 
-  console.log("User is: ", user) 
-  console.log("ThisUser is: ", thisUser)
+  //console.log("isAuthenticated: ", isAuthenticated)
+  //console.log("User is: ", user)
+  //console.log("ThisUser is: ", thisUser)
 
-  
+
   return (
-    <div>
+    <PageContainer>
       <Header
         setMusicSearchText={setMusicSearchText}
         musicSearchRequest={musicSearchRequest}
@@ -121,15 +131,15 @@ function App() {
       <RoutesDiv>
         <Routes>
           <Route path="/" element={
-          <Home 
-            following={following} 
-            setFollowing={setFollowing} 
-            viewWidth={viewWidth}
-            user={thisUser}
-          />} />
+            <Home
+              following={following}
+              setFollowing={setFollowing}
+              viewWidth={viewWidth}
+              user={thisUser}
+            />} />
           <Route path="/profile/:userID" element={
-            <Profile 
-              otherUser={otherUser} 
+            <Profile
+              otherUser={otherUser}
               setOtherUser={setOtherUser}
               otherUserID={profileID}
               user={thisUser}
@@ -139,10 +149,10 @@ function App() {
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
               viewWidth={viewWidth}
-              />} />
+            />} />
           <Route path="/profile/" element={
-            <Profile 
-              otherUser={null} 
+            <Profile
+              otherUser={null}
               otherUserID={null}
               user={thisUser}
               setUser={setThisUser}
@@ -151,31 +161,32 @@ function App() {
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
               viewWidth={viewWidth}
-              />} />
+            />} />
           <Route path="/search/:query" element={
             <SearchResults searchResponse={searchResponse} searchQuery={musicSearchText} setOtherUser={setOtherUser} />
           }/>
-          <Route path="/album/:id" element={<AlbumPage 
-            albumID={albumID} 
+          <Route path="/album/:id" element={<AlbumPage
+            albumID={albumID}
             viewWidth={viewWidth}
             handleSuccessChange={handleSuccessChange}
             handleErrorChange={handleErrorChange}
             user={thisUser}
           />} />
           <Route path="/albumRatings/" element={
-            <AlbumRatings 
-              otherUser={null} 
-              otherUserID={null} 
+            <AlbumRatings
+              otherUser={null}
+              otherUserID={null}
               personalAlbumReviews={personalAlbumReviews}
               setPersonalAlbumReviews={setPersonalAlbumReviews}
-              user={thisUser}    
+              user={thisUser}
             />}
           />
           <Route path="/error/" element={<div> Something went wrong! Navigate back to the home page. </div>} />
           <Route path="*" element={<Home />} />
         </Routes>
       </RoutesDiv>
-    </div>
+      <Footer />
+    </PageContainer>
   )
 }
 

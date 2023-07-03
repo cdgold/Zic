@@ -5,7 +5,8 @@ const theme = {
       main: "#FF0000",
     },
   },
-  headerMargin: "3em",
+  headerMargin: "3.5rem",
+  footerHeight: "3.5rem",
   fonts: {
     sizes: {
       header: "4.0rem",
@@ -26,7 +27,10 @@ const theme = {
     secondaryTwo: "#789dff",
     tertiaryTwo: "#002b9c",
     primaryThree: "#FFFFFF",
-    secondaryThree: "#dbdbdb",
+    secondaryThree: "#ededed",
+    tertiaryThree: "#c4c4c4",
+    quaternaryThree: "#575757",
+    textThree: "#6e6e73",
     success: "#00e31e",
     successTwo: "#008011",
     error: "#8a3630",

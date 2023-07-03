@@ -58,37 +58,38 @@ const ErrorText = styled.span`
 `
 
 
-const TrackEntry = ({ track, 
-    trackRatings, 
-    handleTrackRatingChange, 
-    editMode, 
-    setEditMode
-    }) => {
+const TrackEntry = ({ track,
+  trackRatings,
+  handleTrackRatingChange,
+  editMode,
+  setEditMode
+}) => {
 
-    // if user is null and they attempt to enter edit mode, redirect to login
-  
-    const [showTrackLength, setShowTrackLength] = useState("")
-  
-    useEffect(() => {
-      const trackLengthInSeconds = parseInt(track.duration_ms) / 1000
-      const trackMinutes = Math.floor(trackLengthInSeconds / 60)
-      let leftoverSeconds = Math.floor(trackLengthInSeconds - (trackMinutes * 60))
-      if(leftoverSeconds < 10){
-        leftoverSeconds = `0${leftoverSeconds}`
-      }
-      setShowTrackLength(`${trackMinutes}:${leftoverSeconds}`)
-    }, [track])
-    
-    return(
+  // if user is null and they attempt to enter edit mode, redirect to login
+
+  const [showTrackLength, setShowTrackLength] = useState("")
+
+  useEffect(() => {
+    const trackLengthInSeconds = parseInt(track.duration_ms) / 1000
+    const trackMinutes = Math.floor(trackLengthInSeconds / 60)
+    let leftoverSeconds = Math.floor(trackLengthInSeconds - (trackMinutes * 60))
+    if(leftoverSeconds < 10){
+      leftoverSeconds = `0${leftoverSeconds}`
+    }
+    setShowTrackLength(`${trackMinutes}:${leftoverSeconds}`)
+  }, [track])
+
+  return(
     <tr>
       <td>
-        <span style={{color: "#d4d4d4"}}> {track.track_number} </span> {track.name}
+        <span style={{ color: "#d4d4d4" }}> {track.track_number} </span> {track.name}
       </td>
       <td>
         {showTrackLength}
       </td>
+      {/*
       <td style={{ textAlign: "center" }}>
-      { editMode  
+      { editMode
         ? <TextField
             sx={{ width: "4em", textAlign: "center" }}
             value={trackRatings[track.id] || ""}
@@ -97,62 +98,63 @@ const TrackEntry = ({ track,
             InputLabelProps={{
               shrink: true,
             }}
-          /> 
-        : <StaticTrackRatingSpan onClick={() => setEditMode(!editMode)}> 
-            { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"} 
+          />
+        : <StaticTrackRatingSpan onClick={() => setEditMode(!editMode)}>
+            { trackRatings[track.id] ? `${trackRatings[track.id]}` : "-"}
           </StaticTrackRatingSpan>
-      } 
+      }
       </td>
+    */}
     </tr>
-    )
-  }
+  )
+}
 
-const Tracklist = ({ editMode, 
-  trackRatings, 
-  handleTrackRatingChange, 
+const Tracklist = ({ editMode,
+  trackRatings,
+  handleTrackRatingChange,
   setEditMode,
   album,
-  handleTrackRatingSubmit}) => {
-    return(
-        <TracklistDiv>
-        <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
-          <TracklistTable>
-          <thead>
+  handleTrackRatingSubmit }) => {
+  return(
+    <TracklistDiv>
+      <TracklistTitleDiv> TRACKLIST </TracklistTitleDiv>
+      <TracklistTable>
+        <thead>
           <tr>
-          <TracklistSubtitleTh style={{ width: "55%" }}> Track title </TracklistSubtitleTh>
-          <TracklistSubtitleTh style={{ width: "15%" }}> Len. </TracklistSubtitleTh>
-          <TracklistSubtitleTh style={{ width: "30%" }}> Your Rating </TracklistSubtitleTh>
+            <TracklistSubtitleTh style={{ width: "55%" }}> Track title </TracklistSubtitleTh>
+            <TracklistSubtitleTh style={{ width: "15%" }}> Len. </TracklistSubtitleTh>
+            {/*<TracklistSubtitleTh style={{ width: "30%" }}> Your Rating </TracklistSubtitleTh>*/}
           </tr>
-          </thead>
-          <tbody>
-          {album.tracks.total > 0 ? 
-          album.tracks.items.map(item => 
-          <TrackEntry 
-              key={item.uri} 
-              editMode={editMode} 
-              trackRatings={trackRatings} 
-              handleTrackRatingChange={handleTrackRatingChange} 
-              track={item} 
-              setEditMode={setEditMode}
+        </thead>
+        <tbody>
+          {album.tracks.total > 0 ?
+            album.tracks.items.map(item =>
+              <TrackEntry
+                key={item.uri}
+                editMode={editMode}
+                trackRatings={trackRatings}
+                handleTrackRatingChange={handleTrackRatingChange}
+                track={item}
+                setEditMode={setEditMode}
               />)
-          : <tr> No tracks to show... </tr>
+            : <tr> No tracks to show... </tr>
           }
-          { editMode ? 
+          { /*editMode ?
           <tr>
               <td>
               {(trackRatings.error !== "") ? <ErrorText> {trackRatings.error} </ErrorText> : null}
               </td>
               <td colSpan="2">
-              <Button 
+              <Button
               sx={{ color: "black", fontFamily: `"Archivo Black", "Archivo", sans-serif` }}
-              onClick={() => handleTrackRatingSubmit()} > 
+              onClick={() => handleTrackRatingSubmit()} >
               Submit song ratings </Button>
               </td>
-          </tr> 
-          : null}
-          </tbody>
-          </TracklistTable>
-        </TracklistDiv>
-)}
+          </tr>
+        : null*/}
+        </tbody>
+      </TracklistTable>
+    </TracklistDiv>
+  )}
 
 export default Tracklist

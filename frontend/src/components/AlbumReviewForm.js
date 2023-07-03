@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react"
 // import { StyleSheet } from "react-native"
 import { FormControl, TextField, Button } from "@mui/material"
 import styled, { useTheme, keyframes } from "styled-components"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import { faMusic, faList } from "@fortawesome/free-solid-svg-icons"
 import AcceptButton from "../styling/reusable/AcceptButton.js"
 import DeclineButton from "../styling/reusable/DeclineButton.js"
@@ -42,12 +42,6 @@ const ReviewFormDiv = styled.div`
   width: 100%;
   font-family: ${props => props.theme.bodyFonts};
   font-size: ${props => props.theme.fonts.sizes.bodyMedium};
-`
-
-const FormTitle = styled.div`
-  font-family: ${props => props.theme.titleFonts};
-  font-size: ${props => props.theme.fonts.sizes.titleSmall};
-  text-align: center;
 `
 
 const FormText = styled.div`
@@ -113,7 +107,7 @@ const MusicIcon = styled(FormIcon)`
   grid-row: 1;
 `
 
-const ReviewForm = ({ textReview, 
+const ReviewForm = ({ textReview,
   setTextReview,
   numberRating,
   setNumberRating,
@@ -126,8 +120,10 @@ const ReviewForm = ({ textReview,
   editMode,
   setEditMode,
   isPosting }) => {
-  
+
   const theme = useTheme()
+
+  //console.log("number rating is: ", numberRating)
 
   const [visibleOnEdit, setVisibleOnEdit] = useState("")
   const [musicIconColor, setMusicIconColor] = useState("")
@@ -184,7 +180,7 @@ const ReviewForm = ({ textReview,
 
   const handleNumberRatingChange = (event) => {
     const parsedFloat = parseFloat(event.target.value)
-    let newNumberRating = {value: event.target.value}
+    let newNumberRating = { value: event.target.value }
     if((isNaN(parsedFloat) || parsedFloat > 10.0 || parsedFloat < 0.0) && numberRating.value !== ""){
       newNumberRating["error"] = "Rating must be between 0.0 and 10.0."
     }
@@ -204,7 +200,7 @@ const ReviewForm = ({ textReview,
       }
       if(typeof userRating.rating !== "undefined") {
         console.log("in here with", userRating.rating)
-        setNumberRating({"value": userRating.rating, "error": ""})
+        setNumberRating({ "value": userRating.rating, "error": "" })
       }
       if(typeof userRating.listened !== "undefined") {
         setListened(userRating.listened)
@@ -217,10 +213,10 @@ const ReviewForm = ({ textReview,
 
   return(
     <div style={{ width: "100%" }}>
-        <FormControl sx={{ width: "100%" }}>
+      <FormControl sx={{ width: "100%" }}>
         <ReviewFormDiv>
           <MusicIcon color={musicIconColor} onClick={() => handleListenedChange()}>
-            <FontAwesomeIcon  
+            <FontAwesomeIcon
               icon={faMusic} />
           </MusicIcon> <br></br>
           <ListenedBox>
@@ -233,58 +229,58 @@ const ReviewForm = ({ textReview,
             {listenList ? "On your listen list" : "Add to listen list?"}
           </ListBox>
           { editMode
-          ? <><TextField
+            ? <><TextField
               error={numberRating.error !== ""}
               value={numberRating.value}
               sx={{ width: "6em", gridColumn: "5 / span 2", gridRow: "1", justifySelf: "center" }}
               onChange={event => handleNumberRatingChange(event)}
               InputLabelProps={{
-              shrink: true,
+                shrink: true,
               }}
             /> <br></br></>
-          : <RatingText onClick={() => setEditMode(!editMode)}> 
-            { numberRating.value !== "" ? `${numberRating.value}` : `-` } <br></br> 
-          </RatingText>
+            : <RatingText onClick={() => setEditMode(!editMode)}>
+              { numberRating.value !== "" ? `${numberRating.value}` : `-` } <br></br>
+            </RatingText>
           }
-        <NumberRatingBox>
-          {`Rating`} <br></br> {`(0.0 - 10.0)`}
-        </NumberRatingBox>
-        <FormText style={{ gridColumn: "1 / span 2", gridRow: "3" }} > Your thoughts: </FormText>
-        <div style={{ gridColumn:"3 / span 4", gridRow:"3" }}>
-          { editMode 
-          ? <TextField
-              sx={{ width: "95%" }}
-              value={textReview}
-              onChange={e => {
-                if (e.target.value.length < MAX_REVIEW_LENGTH){
-                  setTextReview(e.target.value)
-                }
-              }}
-              placeholder = "Review the album here..."
-              multiline
-              rows={5}
-          />
-          : <div onClick={() => setEditMode(true)}> { textReview !== "" ? textReview : `None. (Click to edit!)` } </div>
-          }
-        </div>
-        <ErrorText>
-          {numberRating.error !== "" ? `${numberRating.error}` : null}
-        </ErrorText>
-        <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"3 / span 2", justifySelf: "end" }}>
-        <DeclineButton 
-          onclick={() => setEditMode(!editMode)}
-          text={"Stop editing"}
-        />
-        </span>
-        <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"5 / span 2", justifySelf: "end" }}>
-        <AcceptButton 
-          onclick={() => handleFormSubmit()}
-          text={"Submit"}
-          disabled={isPosting}
-          /> 
-        </span>
+          <NumberRatingBox>
+            {`Rating`} <br></br> {`(0.0 - 10.0)`}
+          </NumberRatingBox>
+          <FormText style={{ gridColumn: "1 / span 2", gridRow: "3" }} > Your thoughts: </FormText>
+          <div style={{ gridColumn:"3 / span 4", gridRow:"3" }}>
+            { editMode
+              ? <TextField
+                sx={{ width: "95%" }}
+                value={textReview}
+                onChange={e => {
+                  if (e.target.value.length < MAX_REVIEW_LENGTH){
+                    setTextReview(e.target.value)
+                  }
+                }}
+                placeholder = "Review the album here..."
+                multiline
+                rows={5}
+              />
+              : <div onClick={() => setEditMode(true)}> { textReview !== "" ? textReview : `None. (Click to edit!)` } </div>
+            }
+          </div>
+          <ErrorText>
+            {numberRating.error !== "" ? `${numberRating.error}` : null}
+          </ErrorText>
+          <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"3 / span 2", justifySelf: "end" }}>
+            <DeclineButton
+              onclick={() => setEditMode(!editMode)}
+              text={"Stop editing"}
+            />
+          </span>
+          <span style={{ display: visibleOnEdit, gridRow:"4 / span 1", gridColumn:"5 / span 2", justifySelf: "end" }}>
+            <AcceptButton
+              onclick={() => handleFormSubmit()}
+              text={"Submit"}
+              disabled={isPosting}
+            />
+          </span>
         </ReviewFormDiv>
-        </FormControl>
+      </FormControl>
     </div>
   )
 }

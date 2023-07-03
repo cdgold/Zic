@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react"
-import { useAuth0 } from '@auth0/auth0-react'
+import { useAuth0 } from "@auth0/auth0-react"
 import followerService from "../services/follower.js"
 import albumService from "../services/album.js"
-import dummyResults from "../test/dummySpotifyAlbums.js"
+//import dummyResults from "../test/dummySpotifyAlbums.js"
 import styled, { useTheme } from "styled-components"
 import { Link } from "react-router-dom"
 import SignupPage from "../pages/Signup.js"
@@ -47,9 +47,9 @@ const dummyUsers = [{
 
 const Page = styled.div`
   display: grid; 
-  width: 98vw; 
+  width: 100%; 
   min-width: 320px;
-  height: 90vh;
+  min-height: 80vh;
   align-items: center;
   justify-items: center;
 `
@@ -69,6 +69,7 @@ const PostRow = styled.div`
   grid-template-rows: fit-content(18ch) 1fr;
   row-gap: 1rem;
   column-gap: .5rem;
+  overflow-wrap: break-word;
 `
 
 const FollowingUserAvatar = styled.img`
@@ -106,7 +107,7 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
 
   const theme = useTheme()
 
-  useEffect(() => { 
+  useEffect(() => {
     if (Array.isArray(allAlbumInfo) && allAlbumInfo.length > 0){
       const foundAlbum = allAlbumInfo.find((album) => album.id === post.album_id)
       if (typeof foundAlbum !== "undefined"){
@@ -115,7 +116,7 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
     }
   }, [post, allAlbumInfo])
 
-  useEffect(() => {  
+  useEffect(() => {
     if (Array.isArray(allUserInfo) && allUserInfo.length > 0){
       const foundUser = allUserInfo.find((user) => user.id === post.auth0_id)
       if (typeof foundUser !== "undefined"){
@@ -127,48 +128,45 @@ const FollowingPostRow = ({ post, allAlbumInfo, allUserInfo }) => {
   useEffect(() => {
     if (post.post_time !== undefined) {
       const postDate = new Date(post.post_time)
-      const postString = ((postDate.getMonth() > 8) ? (postDate.getMonth() + 1) : ('0' + (postDate.getMonth() + 1))) + '/' + 
-      ((postDate.getDate() > 9) ? postDate.getDate() : ('0' + postDate.getDate())) + '/' + postDate.getFullYear()
+      const postString = ((postDate.getMonth() > 8) ? (postDate.getMonth() + 1) : ("0" + (postDate.getMonth() + 1))) + "/" +
+      ((postDate.getDate() > 9) ? postDate.getDate() : ("0" + postDate.getDate())) + "/" + postDate.getFullYear()
       setDisplayDate(postString)
     }
   }, [post])
 
-  console.log("Post: ", post, " album: ", thisAlbum, "user: ", thisUser)
-
   if(thisAlbum !== null && thisUser !== null){
-  return(
-    <PostRow>
-      <div style={{ gridColumn: "1", gridRow: "1 / span 2", textAlign: "center" }}> 
-        <Link style={{ color: "inherit", textDecoration: "none" }} to={`/profile/${thisUser.userID}`}>
-          <FollowingUserAvatar src={thisUser.picture} alt={`User avatar of ${thisUser.nickname}`} />
-          {thisUser.nickname} <br></br> 
-        </Link>
-      </div>
-      <div style={{ gridColumn: "2 / span 2", gridRow: "1" }}> 
-        {`Reviewed`} <b>{`${thisAlbum.name}`}</b> by <b>{`${thisAlbum.artists[0].name}`}</b> {displayDate ? ` on ${displayDate}` : null}  
-      </div>
+    return(
+      <PostRow>
+        <div style={{ gridColumn: "1", gridRow: "1 / span 2", textAlign: "center" }}>
+          <Link style={{ color: "inherit", textDecoration: "none" }} to={`/profile/${thisUser.userID}`}>
+            <FollowingUserAvatar src={thisUser.picture} alt={`User avatar of ${thisUser.nickname}`} />
+            {thisUser.nickname} <br></br>
+          </Link>
+        </div>
+        <div style={{ gridColumn: "2 / span 2", gridRow: "1" }}>
+          {`Reviewed`} <b>{`${thisAlbum.name}`}</b> by <b>{`${thisAlbum.artists[0].name}`}</b> {displayDate ? ` on ${displayDate}` : null}
+        </div>
         <Link style={{ color: "inherit", textDecoration: "none" }} to={`/album/${thisAlbum.id}`}>
           <AlbumImageColumn>
             <img style={{ width: "100%" }} src={thisAlbum.images[0].url} alt={`Album cover of ${thisAlbum.name}`} />
             RATING <br></br> <span style={{ fontSize: `${theme.fonts.sizes.titleSmall}` }} > {post.rating} </span>
           </AlbumImageColumn>
         </Link>
-      <div style={{ gridColumn: "3", gridRow: "2" }}>
-        {post.review_text}
-      </div>
-    </PostRow>
-  )
+        <div style={{ gridColumn: "3", gridRow: "2" }}>
+          {post.review_text}
+        </div>
+      </PostRow>
+    )
   }
   return(null)
 }
 
 const Home = ({ following, setFollowing, viewWidth, user }) => {
   const {
-    isLoading,
-    loginWithRedirect
-  } = useAuth0();
+    isLoading
+  } = useAuth0()
 
-  const theme = useTheme() 
+  //const theme = useTheme()
 
   const [followingPosts, setFollowingPosts] = useState(null)
   const [albumInfo, setAlbumInfo] = useState(null)
@@ -177,7 +175,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
 
 
   /*
-  
+
   console.log("followingPosts: ", followingPosts)
   console.log("albumInfo is: ", albumInfo)
   console.log("Following: ", following)
@@ -190,7 +188,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
   }, [])
 */
 
-  
+
   useEffect(() => {
     if(following === null && user !== null && typeof user !== "undefined" && typeof user.userID !== "undefined"){
       console.log("fetching following posts")
@@ -205,7 +203,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
             setFollowing([])
           }
         })
-        .catch((error) => { 
+        .catch(() => {
           setFollowingPosts([])
           setFollowing([])
           setAlbumInfo([])
@@ -220,7 +218,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
             setFollowingPosts([])
           }
         })
-        .catch((error) => { 
+        .catch(() => {
           setFollowingPosts([])
           setAlbumInfo([])
         })
@@ -242,9 +240,9 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
       if (albumsToGet.length > 0){
         albumService.getMultipleSpotifyAlbums(albumsToGet)
           .then((response) => {
-            setAlbumInfo(response.albums)  
+            setAlbumInfo(response.albums)
           })
-          .catch((response) => {
+          .catch(() => {
             setAlbumInfo([])
           })
       }
@@ -273,15 +271,22 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
   return(
     <Page>
       <div style={{ justifySelf: "center" }}>
-      <Title>
-        Recent posts
-      </Title>
-      {(Array.isArray(followingPosts) && followingPosts.length > 0) 
-      ? <PostColumn>
-        {followingPosts.map((post) => <FollowingPostRow post={post} allUserInfo={following} allAlbumInfo={albumInfo} />)}
-        </PostColumn>
-      : <> {`No posts from those you follow.`} </>
-      }
+        {(Array.isArray(followingPosts) && followingPosts.length > 0)
+          ?
+          <>
+            <Title>
+          Recent posts
+            </Title>
+            <PostColumn>
+              {followingPosts.map((post, itr) => <FollowingPostRow key={itr} post={post} allUserInfo={following} allAlbumInfo={albumInfo} />)}
+            </PostColumn>
+          </>
+          : <>
+            <Title>
+          No recent posts.
+            </Title>
+            {`No posts from those you follow. (Search for a friend's username using the search bar above!)`} </>
+        }
       </div>
     </Page>
   )

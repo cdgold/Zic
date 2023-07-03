@@ -15,20 +15,20 @@ const follow = async ({ userID, toFollowID, token }) => {
 }
 
 const unfollow = async ({ userID, toUnfollowID, token }) => {
-    userID = auth0Service.dropStartOfSub(userID)
-    console.log(`user: ${userID}, toUnfollow: ${toUnfollowID}, token: ${token}`)
-    let config = {}
-    config = auth0Service.setHeaderToken({ "config": config, "token": token })
-    const deleteUrl = `${baseUrl}/${toUnfollowID}`
-    const response = await axios.delete(deleteUrl, config)
-    return response.data
+  userID = auth0Service.dropStartOfSub(userID)
+  console.log(`user: ${userID}, toUnfollow: ${toUnfollowID}, token: ${token}`)
+  let config = {}
+  config = auth0Service.setHeaderToken({ "config": config, "token": token })
+  const deleteUrl = `${baseUrl}/${toUnfollowID}`
+  const response = await axios.delete(deleteUrl, config)
+  return response.data
 }
 
 const getFollowing = async ({ userID }) => {
-    userID = auth0Service.dropStartOfSub(userID)
-    const getUrl = `${baseUrl}/following/${userID}`
-    const response = await axios.get(getUrl)
-    return response.data
+  userID = auth0Service.dropStartOfSub(userID)
+  const getUrl = `${baseUrl}/following/${userID}`
+  const response = await axios.get(getUrl)
+  return response.data
 }
 
 const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
@@ -46,16 +46,15 @@ const getFollowingPosts = async ({ userID, numPosts, userInfo }) => {
   let returnValue
   if(response.status === 200){
     response.data.posts.forEach((element, index, array) => {
-      if (typeof element.rating !== undefined){
+      if (typeof element.rating !== "undefined"){
         array[index].rating = albumRatingService.stringifyRating({ "rating": element.rating })
       }
     })
     console.log(response.data)
     returnValue = response.data
-  } else { 
+  } else {
     returnValue = null
   }
-  console.log("got back: ", response)
   return returnValue
 }
 
