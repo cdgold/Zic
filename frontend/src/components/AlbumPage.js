@@ -100,7 +100,7 @@ const TracklistMobileDiv = styled.div`
 
 const AlbumPage = ({ albumID, handleSuccessChange, handleErrorChange, user }) => {
 
-  const { getAccessTokenSilently, getAccessTokenWithPopup } = useAuth0()
+  const { getAccessTokenSilently, getAccessTokenWithPopup, loginWithRedirect } = useAuth0()
   const [editMode, setEditMode] = useState(false)
   const [albumYear, setAlbumYear] = useState(null)
   const [album, setAlbum] = useState(null)
@@ -115,11 +115,11 @@ const AlbumPage = ({ albumID, handleSuccessChange, handleErrorChange, user }) =>
 
   //console.log("trackRatings is: ", trackRatings)
   //console.log("userrating is: ", userRating)
-  /*
-  useEffect(() => {
-
-  })
-  */
+  useEffect(() => {   // checks if user is logged in and if not, redirects
+    if ((editMode === true) && (user === null || user.userID === undefined)){
+      loginWithRedirect()
+    }
+  }, [editMode])
 
   useEffect(() => {
     albumService.getSpotifyAlbum({ "id": albumID })

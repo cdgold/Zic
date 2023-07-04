@@ -3,12 +3,13 @@ const dbpool = require("../utils/databaseConfig.js")
 const usersRouter = require("express").Router()
 const axios = require("axios")
 const auth0Service = require("../services/auth0.js")
+const spotifyService = require("../services/spotify.js")
 
 const MINIMUM_DISPLAY_NAME_LENGTH = 4
 const MAXIMUM_DISPLAY_NAME_LENGTH = 16
+const POSSIBLE_AVATARS_TO_RETURN = 12
 
 usersRouter.get("/", async (request, response) => {
-  const ID = request.params.authID
   //const users = await dbpool.query(`SELECT * FROM "users" WHERE auth0_id = $1`, [ID])
   const config = {
     "headers": {
@@ -73,6 +74,35 @@ usersRouter.patch("/", auth0Service.validateAccessToken, async (request, respons
   }
   const auth0Response = await auth0Service.patchUser({ "patchBody": changes, "userSub": userSub })
   return response.status(200).json(auth0Response)
+})
+
+usersRouter.get("/possibleAvatars/:query", async (request, response) => {
+  const search = request.params.query
+  if (typeof search === "undefined" || search === ""){
+    return response.status(400).json({
+      error: "need query after /possibleAvatars/"
+    })
+  } 
+  const spotifyResponse = await spotifyService.search({ "query": search, "type": "artist", "limit": POSSIBLE_AVATARS_TO_RETURN })
+  //console.log("response: ", spotifyResponse)
+  if (spotifyResponse.length === 0){
+    return response.status(204)
+  }
+  else {
+    const artists = spotifyResponse
+    possiblePics = []
+    artists.forEach((artist) => {
+      if(artist.images.length > 0){
+        if(artist.images.length <= 2){
+          possiblePics.push(artist.images[0].url)
+        }
+        else {
+          possiblePics.push(artist.images[2].url)
+        }
+      }
+    })
+    return response.status(200).json(possiblePics)
+  }
 })
 
 

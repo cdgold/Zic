@@ -171,7 +171,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
   const [followingPosts, setFollowingPosts] = useState(null)
   const [albumInfo, setAlbumInfo] = useState(null)
 
-  console.log("Following is: ", following)
+  //console.log("Following is: ", following)
 
 
   /*
@@ -191,7 +191,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
 
   useEffect(() => {
     if(following === null && user !== null && typeof user !== "undefined" && typeof user.userID !== "undefined"){
-      console.log("fetching following posts")
+      //console.log("fetching following posts")
       followerService.getFollowingPosts({ "userID": user.userID, "numPosts": 15 })
         .then((response) => {
           if (response !== null){
@@ -247,7 +247,7 @@ const Home = ({ following, setFollowing, viewWidth, user }) => {
           })
       }
     } else {
-      console.log("setting to default")
+      //console.log("setting to default")
       setAlbumInfo([])
     }
   }, [followingPosts])

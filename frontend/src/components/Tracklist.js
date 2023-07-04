@@ -32,7 +32,7 @@ const TracklistSubtitleTh = styled.th`
   text-align: left;
   font-size: 20px;
   color: black;
-  text-align: center;
+  text-align: left;
   -webkit-text-stroke-width: 0px;
   -webkit-text-stroke-color: black;
 `

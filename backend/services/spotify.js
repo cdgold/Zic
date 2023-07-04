@@ -79,7 +79,7 @@ const getMultipleWithID = async ({ ids, type }) => {
 
 
 //returns array of search results
-const search = async ({ query, type }) => {
+const search = async ({ query, type, limit }) => {
   await checkTokenValidity()
   let config = {}
   if(token !== null){
@@ -93,10 +93,16 @@ const search = async ({ query, type }) => {
     throw new Error("Set Spotify API key first.")
   }
   if (ACCEPTABLE_SEARCH_TYPES.includes(type)){
-    const searchRequestUrl = `${SPOTIFY_BASE_URL}/search/?q=${query}&type=${type}`
+    let searchRequestUrl = `${SPOTIFY_BASE_URL}/search/?q=${query}&type=${type}`
+    if (typeof limit !== "undefined" && !(isNaN(limit))){
+      searchRequestUrl = `${searchRequestUrl}&limit=${limit}`
+    }
     const response = await axios.get(searchRequestUrl, config)
       if (type == "album"){
         return response.data.albums.items
+      }
+      else if (type == "artist"){
+        return response.data.artists.items
       }
       else{
         return response.data

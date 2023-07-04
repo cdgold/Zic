@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { useAuth0 } from '@auth0/auth0-react'
+import { useAuth0 } from "@auth0/auth0-react"
 import AcceptButton from "../styling/reusable/AcceptButton.js"
 import styled, { useTheme } from "styled-components"
 import darkSideOfTheMoonCover from "../assets/images/darksideofthemoon.png"
@@ -56,7 +56,10 @@ justify-self: center;
 grid-template-columns: 1fr;
 grid-template-rows: auto;
 row-gap: .5rem;
-margin-right: 2rem;
+  @media (min-width: ${MOBILE_VIEW_THRESHOLD}px) {
+    margin-right: 2rem;
+  }
+
 `
 
 const AlbumImg = styled.img`
@@ -89,7 +92,7 @@ const ButtonSpan = styled.span`
 
 const SignupButton = styled.button`
   all: unset;
-  pointer-events:${props => props.disabled ? 'none' : null};
+  pointer-events:${props => props.disabled ? "none" : null};
   font-family: ${props => props.theme.bodyFonts};
   background-color: ${props => props.theme.colors.primaryOne};
   border-radius: 8px;
@@ -105,74 +108,74 @@ const SignupButton = styled.button`
   }
 
   &:active {
-    background-color: ${props=>props.theme.colors.tertiaryOne};
+    background-color: ${props => props.theme.colors.tertiaryOne};
   }
 
   &:disabled {
-    background-color: ${props=>props.theme.colors.disabled};
-    color: ${props=>props.theme.colors.disabledText};
+    background-color: ${props => props.theme.colors.disabled};
+    color: ${props => props.theme.colors.disabledText};
   }
 `
 
 
 const Signup = ({ viewWidth }) => {
   const theme = useTheme()
-  
+
   const { loginWithRedirect } = useAuth0()
 
-  if (viewWidth > MOBILE_VIEW_THRESHOLD){ 
+  if (viewWidth > MOBILE_VIEW_THRESHOLD){
     return(
-        <SignupPage>
-            <SignupTextContainer>
-                <Title>
+      <SignupPage>
+        <SignupTextContainer>
+          <Title>
                     RATE YOUR MUSIC.
-                </Title>
-                <Subtitle>
+          </Title>
+          <Subtitle>
                     Zic lets you track your favorite albums and share them with others.
-                </Subtitle>
-                <ButtonSpan>
-                  <SignupButton 
-                    onClick={(() => loginWithRedirect({
-                    authorizationParams:{
-                        screen_hint: "signup"
-                    }
-                    }))}>
+          </Subtitle>
+          <ButtonSpan>
+            <SignupButton
+              onClick={(() => loginWithRedirect({
+                authorizationParams:{
+                  screen_hint: "signup"
+                }
+              }))}>
                       Sign up
-                  </SignupButton>
-                </ButtonSpan>
-            </SignupTextContainer>
-            <AlbumImg1 src={flowerBoyCover} alt={"Flower Boy by Tyler, The Creator's album cover"}></AlbumImg1>
-            <AlbumImg2 src={titanicRisingCover} alt={"Titanic Rising by Weyes Blood's album cover"}></AlbumImg2>
-            <AlbumImg3 src={darkSideOfTheMoonCover} alt={"The Dark Side of the Moon by Pink Floyd's album cover"}></AlbumImg3>
-        </SignupPage>
-  )
+            </SignupButton>
+          </ButtonSpan>
+        </SignupTextContainer>
+        <AlbumImg1 src={flowerBoyCover} alt={"Flower Boy by Tyler, The Creator's album cover"}></AlbumImg1>
+        <AlbumImg2 src={titanicRisingCover} alt={"Titanic Rising by Weyes Blood's album cover"}></AlbumImg2>
+        <AlbumImg3 src={darkSideOfTheMoonCover} alt={"The Dark Side of the Moon by Pink Floyd's album cover"}></AlbumImg3>
+      </SignupPage>
+    )
   }
   return(
     <MobileSignupPage>
-        <span style={{ gridRow: 1, gridColumn: "1 / span 3", alignSelf: "center", marginRight: "0" }}>
-            <SignupTextContainer>
-                <Title>
+      <span style={{ gridRow: 1, gridColumn: "1 / span 3", alignSelf: "center", marginRight: "0" }}>
+        <SignupTextContainer>
+          <Title>
                     RATE YOUR MUSIC.
-                </Title>
-                <Subtitle>
+          </Title>
+          <Subtitle>
                     Zic lets you track your favorite albums and share them with others.
-                </Subtitle>
-                <ButtonSpan>
-                    <SignupButton 
-                    onClick={(() => loginWithRedirect({
-                    authorizationParams:{
-                        screen_hint: "signup"
-                    }
-                    }))}>
+          </Subtitle>
+          <ButtonSpan>
+            <SignupButton
+              onClick={(() => loginWithRedirect({
+                authorizationParams:{
+                  screen_hint: "signup"
+                }
+              }))}>
                       Sign up
-                    </SignupButton>
-                </ButtonSpan>
-            </SignupTextContainer>
-        </span>
-        {/*
+            </SignupButton>
+          </ButtonSpan>
+        </SignupTextContainer>
+      </span>
+      {/*
         <span style={{ gridRow: 2, gridColumn: 1 }}>
-            <AlbumImg1 
-            src={flowerBoyCover} 
+            <AlbumImg1
+            src={flowerBoyCover}
             alt={"Flower Boy by Tyler, The Creator's album cover"}>
             </AlbumImg1>
         </span>
@@ -185,6 +188,6 @@ const Signup = ({ viewWidth }) => {
         */}
     </MobileSignupPage>
   )
-} 
+}
 
 export default Signup

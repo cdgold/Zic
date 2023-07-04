@@ -15,7 +15,7 @@ const stringifyRating = ({ rating }) => {
   else {  // rating string 3 digits, must be 10.0
     ratingString = "10.0"
   }
-  console.log("returning: ", ratingString)
+  //console.log("returning: ", ratingString)
   return ratingString
 }
 

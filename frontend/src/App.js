@@ -56,7 +56,7 @@ function App() {
   }
 
   const handleErrorChange = ({ notification, timeInSec = 5 }) => {
-    console.log("handling error with notification: ", notification, "and time in sec:", timeInSec)
+    //console.log("handling error with notification: ", notification, "and time in sec:", timeInSec)
     setErrorNotification(`${notification}`)
     setTimeout(() => setErrorNotification(""), timeInSec * 1000)
   }
@@ -64,7 +64,7 @@ function App() {
   useEffect(() => { // fetches user profile info if not fetched yet
     if (typeof user !== "undefined" && typeof user.sub !== "undefined"){
       if (thisUser === null){
-        console.log("fetching user")
+        //console.log("fetching user")
         const userID = auth0Service.dropStartOfSub(user.sub)
         userService.getUserProfile({ "userID": userID })
           .then((response) => {
