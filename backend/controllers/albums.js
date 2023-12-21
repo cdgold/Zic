@@ -2,13 +2,18 @@ const dbpool = require("../utils/databaseConfig.js")
 const albumsRouter = require("express").Router()
 const spotifyService = require("../services/spotify.js")
 
-/*
-albumsRouter.get("/", async (request, response) => {
-  const albums = await dbpool.query(`SELECT * FROM albums`)
-
-  response.json(albums.rows)
+// gets most popular of new releases
+albumsRouter.get("/newReleases", async (request, response) => {
+  const newReleases = await spotifyService.getNewAlbums()
+    /*
+  const albumsToReturn = 4
+  newReleases.sort((a, b) => {
+    b.popularity - a.popularity
+  })
+  const returnReleases = newReleases.slice(0, albumsToReturn)
+  */
+  return response.status(200).json(newReleases)
 })
-*/
 
 // checks Spotify api (not Zic database) for query matches
 albumsRouter.get("/searchSpotify/:query", async (request, response) => {
@@ -23,15 +28,6 @@ albumsRouter.get("/searchSpotify/:query", async (request, response) => {
   const query = request.params.query
   const results = await spotifyService.search({"query": query, "type": "album"})
   return response.status(200).json(results)
-})
-
-albumsRouter.get("/:id", async (request, response) => {
-  /*
-  const albumID = request.params.id
-  const album = await dbpool.query(`SELECT * FROM albums WHERE album_id = $1`, [albumID])
-  console.log("album is: ", album)
-  album.rowCount === 0 ? response.status(204).end() : response.status(200).json(album.rows)
-  */
 })
 
 albumsRouter.get("/spotify/:id", async (request, response, next) => {

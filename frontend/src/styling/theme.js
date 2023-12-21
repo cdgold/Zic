@@ -20,10 +20,10 @@ const theme = {
     }
   },
   colors: {
-    primaryOne: "#FF0000",
-    secondaryOne: "#ff6b6b",
+    primaryOne: "#ff6b6b",
+    secondaryOne: "#FF0000",
     tertiaryOne: "#a10000",
-    primaryTwo: "#0047FF",
+    primaryTwo: "#0041e6",
     secondaryTwo: "#789dff",
     tertiaryTwo: "#002b9c",
     primaryThree: "#FFFFFF",

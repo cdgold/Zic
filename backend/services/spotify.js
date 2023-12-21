@@ -6,6 +6,7 @@ const SPOTIFY_SECRET = `${process.env.SPOTIFY_SECRET}`
 const SPOTIFY_TOKEN_URL = "https://accounts.spotify.com/api/token"
 const SPOTIFY_BASE_URL = "https://api.spotify.com/v1"
 const ACCEPTABLE_SEARCH_TYPES = ["album", "artist", "track"]
+const COUNTRY_CODE = "US"
 
 TIME_NEEDED_FOR_REFRESH_SECONDS = 3600
 // https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow - for implementing playlist saving, listen history, etc.
@@ -28,6 +29,25 @@ const checkTokenValidity = async () => {
     if (tokenAcquisitionTime === null || Date.now() === tokenAcquisitionTime.now() + (TIME_NEEDED_FOR_REFRESH_SECONDS * 1000)){
         await getAndSetToken()
     }
+}
+
+const getNewAlbums = async () => {
+  await checkTokenValidity()
+  let config = {}
+  if(token !== null){
+    config = {
+      headers:{
+        "Authorization": token
+      }
+    }
+  }
+  else {
+    throw new Error("Set Spotify API key first.")
+  }
+  const albumsToPoll = 4
+  const getUrl = `${SPOTIFY_BASE_URL}/browse/new-releases?country=${COUNTRY_CODE}&limit=${albumsToPoll}`
+  const response = await axios.get(getUrl, config)
+  return response.data.albums.items
 }
 
 const getWithID = async ({ id, type }) => {
@@ -114,4 +134,4 @@ const search = async ({ query, type, limit }) => {
 }
 
 
-module.exports = {getAndSetToken, search, getWithID, getMultipleWithID}
+module.exports = {getAndSetToken, search, getWithID, getMultipleWithID, getNewAlbums}

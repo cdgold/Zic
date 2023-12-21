@@ -5,6 +5,7 @@ import styled, { useTheme } from "styled-components"
 import darkSideOfTheMoonCover from "../assets/images/darksideofthemoon.png"
 import titanicRisingCover from "../assets/images/titanicrising.jpg"
 import flowerBoyCover from "../assets/images/flowerboy.png"
+import { dummyNewReleases } from "../test/dummyNewReleases.js"
 
 const MOBILE_VIEW_THRESHOLD = 750
 
@@ -120,6 +121,7 @@ const SignupButton = styled.button`
 
 const Signup = ({ viewWidth }) => {
   const theme = useTheme()
+  const newReleases = dummyNewReleases
 
   const { loginWithRedirect } = useAuth0()
 
